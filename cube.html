@@ -21,12 +21,16 @@
       --radius: 16px;
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
       --font: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-      --front: #3b82f6;
-      --back: #ef4444;
-      --right: #22c55e;
-      --left: #eab308;
-      --top: #a855f7;
-      --bottom: #f97316;
+      /* Three-color scheme; opposite faces share a color */
+      --face-lr: #ffa100; /* left + right */
+      --face-fb: #6699cc; /* front + back */
+      --face-tb: #99cc34; /* top + bottom */
+      --front: var(--face-fb);
+      --back: var(--face-fb);
+      --right: var(--face-lr);
+      --left: var(--face-lr);
+      --top: var(--face-tb);
+      --bottom: var(--face-tb);
 
       /* Shared motion language */
       --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -478,7 +482,7 @@
 
     .content-section.is-points .points-main {
       min-width: 0;
-      padding-right: calc(200px + 1.1rem);
+      padding-right: calc(175px + 1.1rem);
     }
 
     .actor-card {
@@ -488,7 +492,7 @@
       z-index: 2;
       display: flex;
       flex-direction: column;
-      width: 200px;
+      width: 175px;
       margin: 0;
       overflow: hidden;
       border-radius: 14px;
@@ -501,8 +505,8 @@
 
     .actor-card img {
       display: block;
-      width: 200px;
-      height: 200px;
+      width: 175px;
+      height: 175px;
       object-fit: cover;
       background:
         linear-gradient(145deg, rgba(125, 211, 252, 0.25), rgba(167, 139, 250, 0.28));
@@ -529,7 +533,7 @@
         position: relative;
         top: auto;
         right: auto;
-        width: min(200px, 100%);
+        width: min(175px, 100%);
         margin: 0 0 0.75rem auto;
       }
 
@@ -640,12 +644,12 @@
       color: var(--muted);
     }
 
-    .face-template[data-face="front"]  { --face-accent: #60a5fa; }
-    .face-template[data-face="back"]   { --face-accent: #f87171; }
-    .face-template[data-face="right"]  { --face-accent: #4ade80; }
-    .face-template[data-face="left"]   { --face-accent: #facc15; }
-    .face-template[data-face="top"]    { --face-accent: #c084fc; }
-    .face-template[data-face="bottom"] { --face-accent: #fb923c; }
+    .face-template[data-face="front"]  { --face-accent: #6699cc; }
+    .face-template[data-face="back"]   { --face-accent: #6699cc; }
+    .face-template[data-face="right"]  { --face-accent: #ffa100; }
+    .face-template[data-face="left"]   { --face-accent: #ffa100; }
+    .face-template[data-face="top"]    { --face-accent: #99cc34; }
+    .face-template[data-face="bottom"] { --face-accent: #99cc34; }
     .face-template[data-face="overview"] { --face-accent: #7dd3fc; }
 
     .pane-cube {
@@ -872,33 +876,33 @@
     }
 
     .front  {
-      --face-glow: #60a5fa;
-      background: linear-gradient(145deg, #60a5fa, #2563eb 55%, #1d4ed8);
+      --face-glow: var(--face-fb);
+      background: linear-gradient(145deg, #8fb6db, var(--face-fb) 55%, #4d7aa8);
       transform: rotateY(0deg) translateZ(calc(var(--half) + var(--face-lift)));
     }
     .back   {
-      --face-glow: #f87171;
-      background: linear-gradient(145deg, #f87171, #ef4444 55%, #b91c1c);
+      --face-glow: var(--face-fb);
+      background: linear-gradient(145deg, #8fb6db, var(--face-fb) 55%, #4d7aa8);
       transform: rotateY(180deg) translateZ(calc(var(--half) + var(--face-lift)));
     }
     .right  {
-      --face-glow: #4ade80;
-      background: linear-gradient(145deg, #4ade80, #22c55e 55%, #15803d);
+      --face-glow: var(--face-lr);
+      background: linear-gradient(145deg, #ffb84d, var(--face-lr) 55%, #cc8000);
       transform: rotateY(90deg) translateZ(calc(var(--half) + var(--face-lift)));
     }
     .left   {
-      --face-glow: #facc15;
-      background: linear-gradient(145deg, #facc15, #eab308 55%, #a16207);
+      --face-glow: var(--face-lr);
+      background: linear-gradient(145deg, #ffb84d, var(--face-lr) 55%, #cc8000);
       transform: rotateY(-90deg) translateZ(calc(var(--half) + var(--face-lift)));
     }
     .top    {
-      --face-glow: #c084fc;
-      background: linear-gradient(145deg, #c084fc, #a855f7 55%, #7e22ce);
+      --face-glow: var(--face-tb);
+      background: linear-gradient(145deg, #b8e06a, var(--face-tb) 55%, #7aa328);
       transform: rotateX(90deg) translateZ(calc(var(--half) + var(--face-lift)));
     }
     .bottom {
-      --face-glow: #fb923c;
-      background: linear-gradient(145deg, #fb923c, #f97316 55%, #c2410c);
+      --face-glow: var(--face-tb);
+      background: linear-gradient(145deg, #b8e06a, var(--face-tb) 55%, #7aa328);
       transform: rotateX(-90deg) translateZ(calc(var(--half) + var(--face-lift)));
     }
 
@@ -1198,12 +1202,12 @@
     }
 
     /* Face colors applied only when selected */
-    .face-btn[data-face="front"]  { --btn-active-from: #60a5fa; --btn-active-to: #1d4ed8; }
-    .face-btn[data-face="back"]   { --btn-active-from: #f87171; --btn-active-to: #b91c1c; }
-    .face-btn[data-face="right"]  { --btn-active-from: #4ade80; --btn-active-to: #15803d; }
-    .face-btn[data-face="left"]   { --btn-active-from: #facc15; --btn-active-to: #a16207; }
-    .face-btn[data-face="top"]    { --btn-active-from: #c084fc; --btn-active-to: #7e22ce; }
-    .face-btn[data-face="bottom"] { --btn-active-from: #fb923c; --btn-active-to: #c2410c; }
+    .face-btn[data-face="front"]  { --btn-active-from: #8fb6db; --btn-active-to: #4d7aa8; }
+    .face-btn[data-face="back"]   { --btn-active-from: #8fb6db; --btn-active-to: #4d7aa8; }
+    .face-btn[data-face="right"]  { --btn-active-from: #ffb84d; --btn-active-to: #cc8000; }
+    .face-btn[data-face="left"]   { --btn-active-from: #ffb84d; --btn-active-to: #cc8000; }
+    .face-btn[data-face="top"]    { --btn-active-from: #b8e06a; --btn-active-to: #7aa328; }
+    .face-btn[data-face="bottom"] { --btn-active-from: #b8e06a; --btn-active-to: #7aa328; }
 
     .desktop-only-hint {
       display: block;
@@ -1405,8 +1409,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-overview.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1449,8 +1453,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-front.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1493,8 +1497,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-back.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1537,8 +1541,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-right.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1581,8 +1585,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-left.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1625,8 +1629,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-top.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1669,8 +1673,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-bottom.svg"
-                width="200"
-                height="200"
+                width="175"
+                height="175"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
