@@ -1,16 +1,16 @@
-# Interactive 3D Cube
+# C4L DataCube Presentation
 
-A single-page interactive demo built with **HTML**, **CSS**, and **vanilla JavaScript**.  
-It features a CSS 3D cube, face-linked content templates, auto-rotation, and manual orbit controls.
+Interactive 3D cube presentation demo (`c4l_datacube_presentation`).
+
+Single-page app built with **HTML**, **CSS**, and **vanilla JavaScript**.  
+No build step or dependencies.
 
 ## Files
 
 | File | Purpose |
 | --- | --- |
 | `cube.html` | Complete app (markup, styles, and script) |
-| `README.md` | Setup and usage documentation |
-
-No build step, bundler, or dependencies are required.
+| `README.md` | Setup, usage, and UI structure docs |
 
 ## Quick start
 
@@ -20,149 +20,158 @@ No build step, bundler, or dependencies are required.
 open cube.html
 ```
 
-Or double-click `cube.html` in Finder.
-
 ### Option B — local static server (recommended)
 
-Serving over `http://` avoids some browser restrictions with local files and remote images.
-
 ```bash
-# from your home directory
 cd /Users/thomas.micheler/work/c4l_datacube_presentation
 python3 -m http.server 8080
 ```
 
-Then open:
+Open:
 
 ```text
 http://localhost:8080/cube.html
 ```
 
-## Features
+## Final UI structure
 
-- **Split layout**
-  - Left: content pane (bullets + 2 images per face)
-  - Right: 3D cube + controls
-- **Auto-rotation** by default (tumble path includes top and bottom faces)
-- **Face snap buttons** lock the cube and swap left-pane content
-- **Manual inspection**
-  - Drag the cube
-  - On-screen orbit pad + roll / reset / auto-spin
-  - Keyboard shortcuts
-- **Responsive controls** for desktop and mobile touch targets
-- **Motion transitions** for cube locks and content swaps
+```text
+┌──────────────────────────────── layout ────────────────────────────────┐
+│                                                                        │
+│  LEFT: Content pane (~flexible)     RIGHT: Datacube pane (narrow)      │
+│  ┌─────────────────────────────┐    ┌──────────────────────────────┐   │
+│  │ Content · <template>        │    │ Datacube                     │   │
+│  │                             │    │                              │   │
+│  │ TOP (~2/3) points section   │    │  3D cube stage               │   │
+│  │  ┌──────────────────┬─────┐ │    │  (drag to orbit)             │   │
+│  │  │ title/bullets    │ACTOR│ │    │                              │   │
+│  │  │                  │200px│ │    │                              │   │
+│  │  └──────────────────┴─────┘ │    ├──────────────────────────────┤   │
+│  │                             │    │ Features                     │   │
+│  │ BOTTOM (~1/3) media         │    │  [Front ]                    │   │
+│  │  ┌──────────┬──────────┐    │    │  [Back  ]  vertical stack    │   │
+│  │  │ image 1  │ image 2  │    │    │  [Right ]                    │   │
+│  │  └──────────┴──────────┘    │    │  [Left  ]                    │   │
+│  └─────────────────────────────┘    │  [Top   ]                    │   │
+│                                     │  [Bottom]                    │   │
+│                                     └──────────────────────────────┘   │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-## Usage
+### Left pane (`pane-content`)
 
-### Cube interaction
+Switches by selected cube face (or overview while auto-spinning / free inspect).
 
-1. Watch the cube auto-rotate.
-2. Click a **face button** (or a cube face) to lock that side and load its content.
-3. Drag the cube (or use orbit controls) for free inspection.
-4. Click **Auto-spin** or empty background space to resume rotation.
-5. Click **Reset view** to return to a neutral inspect pose.
+Each template includes:
 
-### Keyboard shortcuts
+1. **Points section (top, ~2/3 height)**
+   - Face kicker, title, intro text
+   - Bullet list
+   - **ACTOR** placeholder card (200×200) in the top-right corner
+2. **Media section (bottom, ~1/3 height)**
+   - Exactly **two** reference images with captions
 
-| Key | Action |
+Templates:
+
+- `overview`
+- `front`, `back`, `right`, `left`, `top`, `bottom`
+
+### Right pane (`pane-cube`)
+
+1. **Datacube stage**
+   - CSS 3D cube
+   - Drag to free-orbit
+   - Click a cube face to lock that side
+2. **Features panel**
+   - Six vertically stacked feature buttons
+   - Selecting a button locks orientation and swaps left content
+
+## Interaction model
+
+| Action | Result |
 | --- | --- |
-| `←` `→` or `A` `D` | Yaw left / right |
-| `↑` `↓` or `W` `S` | Pitch up / down |
-| `Q` `E` | Roll |
-| `R` | Reset view |
+| Page load | Auto-spin + overview content |
+| Click feature button / cube face | Lock face + load matching template |
+| Drag cube | Free inspect mode |
+| Click empty background | Resume auto-spin + overview |
+| Keyboard orbit (`WASD` / arrows, `Q`/`E`) | Free inspect nudges |
 | `Space` | Toggle auto-spin |
+| `R` | Reset inspect pose |
 
-Keyboard shortcuts are ignored while focus is inside form controls/buttons that handle their own keys.
+## Responsive verification
 
-### Content templates
+Structural checks passed for the current `cube.html`.
 
-Left-pane content is defined as templates in `cube.html`:
+### Breakpoints
 
-- `data-face="overview"` — shown during auto-spin / free inspect
-- `data-face="front|back|right|left|top|bottom"` — shown when that face is locked
+| Viewport | Layout behavior |
+| --- | --- |
+| **> 1100px** | Two columns: flexible content + datacube `220–280px` |
+| **≤ 1100px** | Datacube column tightens to `200–240px` |
+| **≤ 960px** | Stacked layout: Datacube first, Content below |
+| **≤ 720px** | Actor card stops floating top-right and stacks in flow |
+| **≤ 640px** | Smaller cube size and compact feature buttons (still vertical) |
+| **≤ 420px** | Further compact feature button type size |
+| **Desktop short height** (`≥961px` and `max-height: 820px`) | Reduced stage min-height to avoid overflow |
+| **`prefers-reduced-motion`** | Non-essential transitions/animations disabled |
+| **`hover: none`** | Cube-face hover lift disabled on touch devices |
 
-Each face template includes:
+### Responsiveness notes
 
-- title + description
-- bullet list (`.content-list`)
-- two images (`.content-gallery`)
+- Left template uses CSS grid rows `2fr / 1fr` so points stay dominant across widths.
+- Long bullet lists scroll inside the top section instead of pushing media away.
+- Media images fill the lower third rather than using a fixed aspect-only box.
+- Feature buttons remain one vertical column at all breakpoints.
+- On mobile, datacube appears above content for faster interaction.
 
-Edit those blocks to replace sample copy and image URLs.
+### Manual check checklist
 
-## Accessibility notes
+Use browser devtools device mode (or resize window) and confirm:
 
-Checked and improved in this pass:
+1. **Desktop wide:** content left, narrow datacube right, actor top-right in points card  
+2. **~1000px:** right column still narrow, no horizontal page scroll  
+3. **Tablet (~800px):** stacked panes, datacube on top  
+4. **Phone (~390px):** vertical feature list usable, actor not overlapping text  
+5. **Landscape short desktop:** cube/controls remain reachable without clipping critical UI  
+6. **Reduce motion OS setting:** transitions settle immediately / minimal motion  
 
-- Semantic landmarks and labeled control groups
-- Native `<button>` controls with `aria-label` / `aria-pressed` where useful
-- Skip link to cube controls
-- `aria-live="polite"` status text for mode/content changes
-- Visible `:focus-visible` outlines on interactive controls
-- Image `alt` text on sample media
-- `prefers-reduced-motion` disables non-essential animation
-- Touch-friendly minimum control sizes on small screens
+## Accessibility snapshot
 
-Known limitations:
+- Skip link to features/controls panel  
+- Native buttons with `aria-pressed` on feature controls  
+- Labeled groups and pane landmarks  
+- Image `alt` text for media and actor placeholder  
+- Focus-visible outlines on interactive controls  
+- Reduced-motion support  
 
-- The 3D stage uses pointer dragging; equivalent button/keyboard controls are provided
-- Continuous orientation readout is not announced on every frame (by design, to avoid SR noise)
-- Some visual effects rely on modern CSS (`color-mix`, `@property`, `dvh`)
+Known limits:
+
+- Drag orbit is pointer-based; keyboard alternatives exist  
+- Some styling depends on modern CSS (`color-mix`, `@property`, `dvh`)
 
 ## Browser support
 
-Designed for current evergreen browsers:
+Target: current Chrome, Edge, Firefox, Safari (desktop/mobile).  
+Internet Explorer is not supported.
 
-- Chrome / Edge (latest)
-- Firefox (latest)
-- Safari (latest, macOS/iOS)
+## Customization
 
-Expected support details:
-
-| Capability | Notes |
+| Area | Where to edit |
 | --- | --- |
-| CSS 3D transforms | Required core feature |
-| `clamp()`, CSS variables | Broad support |
-| `dvh` units | Modern browsers; layout still works with fallbacks via min-height |
-| `color-mix()` | Modern browsers; accents may degrade gracefully if unsupported |
-| Pointer Events API | Used for drag orbit |
-| `backdrop-filter` | Visual enhancement only |
-
-For best results use an up-to-date desktop or mobile browser. Internet Explorer is not supported.
-
-## Project structure (conceptual)
-
-```text
-cube.html
-├── Left pane
-│   └── Face content templates (overview + 6 faces)
-└── Right pane
-    ├── 3D cube stage (drag to orbit)
-    └── Controls
-        ├── Orbit pad / roll / auto-spin / reset
-        └── Face snap buttons
-```
-
-## Customization tips
-
-- **Cube size**: change `--cube-size` in `:root`
-- **Motion timing**: adjust `--dur-lock`, `--dur-content`, `--dur-bg`
-- **Auto-spin feel**: tune `AUTO_SPIN_SPEED`, `PITCH_MAIN`, `PITCH_SECONDARY` in the script
-- **Colors**: face gradients and button tokens are per-face CSS custom properties
+| Face copy / bullets / images | Face templates in `cube.html` (`data-face="..."`) |
+| Actor image | `.actor-card img` in each points section (or shared asset later) |
+| Cube size | `:root --cube-size` |
+| Column widths | `.layout { grid-template-columns: ... }` |
+| Points/media ratio | `.face-template { grid-template-rows: 2fr 1fr; }` |
+| Auto-spin feel | `AUTO_SPIN_SPEED`, `PITCH_SPEED`, `PITCH_MAIN` in script |
 
 ## Troubleshooting
 
-- **Images don’t load**  
-  Sample images are remote (Unsplash). Check network access, or replace with local image paths.
-
-- **Drag feels ignored on mobile**  
-  Use the orbit pad buttons; ensure you’re dragging on the cube stage area.
-
-- **Content doesn’t change**  
-  Confirm a face button is active (highlighted). Auto-spin mode shows the overview template.
-
-- **Animations are reduced/disabled**  
-  Your OS/browser may have “Reduce motion” enabled.
+- **Remote images missing:** Unsplash URLs need network access, or replace with local files.  
+- **Content not switching:** ensure a Features button is selected (highlighted).  
+- **Auto-spin resume:** click empty background (outside content/features/cube controls).  
+- **Motion reduced unexpectedly:** check OS/browser “Reduce motion”.
 
 ## License
 
-Demo project for local use. Replace sample images/copy with your own assets before publishing.
+Demo project for presentation use. Replace placeholder media and copy before public release.
