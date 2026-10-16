@@ -1028,8 +1028,8 @@
 
     .face-buttons {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 0.35rem;
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
       width: 100%;
     }
 
@@ -1039,12 +1039,12 @@
       min-height: var(--touch-min);
       border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 10px;
-      padding: 0.55rem 0.2rem;
+      padding: 0.65rem 0.55rem;
       color: #fff;
       font: inherit;
-      font-size: clamp(0.58rem, 0.95vw, 0.72rem);
+      font-size: clamp(0.72rem, 1.2vw, 0.85rem);
       font-weight: 700;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
       white-space: nowrap;
       overflow: hidden;
@@ -1162,12 +1162,12 @@
       }
 
       .face-buttons {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: 1fr;
       }
 
       .face-btn {
-        font-size: clamp(0.55rem, 2.2vw, 0.7rem);
-        padding: 0.55rem 0.15rem;
+        font-size: clamp(0.75rem, 2.4vw, 0.9rem);
+        padding: 0.7rem 0.75rem;
       }
 
       .controls-grid {
@@ -1193,32 +1193,25 @@
       }
 
       .face-buttons {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 0.3rem;
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
       }
 
       .face-btn {
-        min-height: 2.4rem;
-        padding: 0.45rem 0.1rem;
-        font-size: 0.55rem;
-        letter-spacing: 0.01em;
-      }
-
-      .faces-hint {
-        margin-bottom: 0.55rem;
+        min-height: 2.5rem;
+        padding: 0.65rem 0.75rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.03em;
       }
     }
 
     @media (max-width: 420px) {
       .face-buttons {
-        /* Keep one horizontal row; allow slight horizontal scroll if needed */
-        grid-template-columns: repeat(6, minmax(2.6rem, 1fr));
-        overflow-x: auto;
-        padding-bottom: 0.15rem;
+        grid-template-columns: 1fr;
       }
 
       .face-btn {
-        font-size: 0.52rem;
+        font-size: 0.78rem;
       }
     }
 
@@ -1515,10 +1508,10 @@
       </div>
     </section>
 
-    <section class="pane pane-cube" aria-label="Cube">
-      <div class="pane-label">Cube</div>
+    <section class="pane pane-cube" aria-label="Datacube">
+      <div class="pane-label">Datacube</div>
       <div class="pane-body">
-        <div class="stage-wrap" id="stageWrap" title="Drag to rotate" role="application" aria-label="Interactive 3D cube. Drag to rotate. Face buttons snap to a side.">
+        <div class="stage-wrap" id="stageWrap" title="Drag to rotate" role="application" aria-label="Interactive 3D datacube. Drag to rotate. Feature buttons snap to a side.">
           <div class="cube-stage">
             <div class="scene">
               <div class="cube" id="cube">
@@ -1533,10 +1526,9 @@
           </div>
         </div>
 
-        <aside class="faces-panel" id="facesPanel" aria-labelledby="showFaceHeading">
-          <h2 id="showFaceHeading">Show face</h2>
-          <p class="faces-hint" id="facesHint" aria-live="polite">Auto-rotating · choose a face to lock</p>
-          <div class="face-buttons" role="group" aria-labelledby="showFaceHeading">
+        <aside class="faces-panel" id="facesPanel" aria-labelledby="featuresHeading">
+          <h2 id="featuresHeading">Features</h2>
+          <div class="face-buttons" role="group" aria-labelledby="featuresHeading">
             <button class="face-btn" type="button" data-face="front" aria-pressed="false">Front</button>
             <button class="face-btn" type="button" data-face="back" aria-pressed="false">Back</button>
             <button class="face-btn" type="button" data-face="right" aria-pressed="false">Right</button>
@@ -1554,7 +1546,6 @@
     const stage = document.querySelector('.cube-stage');
     const stageWrap = document.getElementById('stageWrap');
     const panel = document.getElementById('facesPanel');
-    const hint = document.getElementById('facesHint');
     const contentLabel = document.getElementById('contentPaneLabel');
     const body = document.body;
     const buttons = Array.from(document.querySelectorAll('.face-btn'));
@@ -1606,7 +1597,6 @@
     let inspecting = false;
     let autoSpinId = null;
     let rotateTimer = null;
-    let hintTimer = null;
     let contentTimer = null;
     let lastFrame = 0;
 
@@ -1639,28 +1629,6 @@
       const z = Math.sin(yawRad * 0.33 + 0.4) * ROLL_AMOUNT;
 
       return { x, y, z };
-    }
-
-    function setHint() {
-      let nextText;
-      if (autoSpin) {
-        nextText = 'Auto-rotating · choose a face to lock';
-      } else if (selectedFace) {
-        nextText = `Locked on ${selectedFace} · click background to resume`;
-      } else if (inspecting) {
-        nextText = 'Free inspect · drag cube or use face buttons';
-      } else {
-        nextText = 'Paused · choose a face or click background to resume';
-      }
-
-      if (hint.textContent === nextText) return;
-
-      window.clearTimeout(hintTimer);
-      hint.classList.add('is-updating');
-      hintTimer = window.setTimeout(() => {
-        hint.textContent = nextText;
-        hint.classList.remove('is-updating');
-      }, 160);
     }
 
     function clearSelection() {
@@ -1772,8 +1740,6 @@
         clearSelection();
         showContentTemplate('overview');
       }
-
-      setHint();
     }
 
     function stopAutoSpin() {
@@ -1794,7 +1760,6 @@
       body.classList.add('is-focused');
       body.classList.remove('is-auto-spinning');
       cube.style.transition = '';
-      setHint();
     }
 
     function nudgeOrbit({ dx = 0, dy = 0, dz = 0 } = {}) {
@@ -1822,7 +1787,6 @@
       body.classList.remove('is-focused', 'is-inspecting');
       body.classList.add('is-auto-spinning');
       showContentTemplate('overview');
-      setHint();
 
       // Brief ease from locked pose into auto-spin trajectory
       cube.classList.remove('is-auto-spinning');
@@ -1887,8 +1851,6 @@
         btn.classList.toggle('active', isActive);
         btn.setAttribute('aria-pressed', String(isActive));
       });
-
-      setHint();
     }
 
     function isInteractiveTarget(target) {
@@ -1940,7 +1902,6 @@
             selectedFace = null;
             clearSelection();
             showContentTemplate('overview');
-            setHint();
           }
         }
       }
