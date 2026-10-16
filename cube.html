@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive 3D CSS cube with face-linked content, manual orbit controls, and auto-rotation." />
+  <meta name="color-scheme" content="dark" />
+  <title>Interactive 3D Cube</title>
+  <style>
+    :root {
+      --bg-0: #020617;
+      --bg-1: #0b1224;
+      --bg-2: #13203a;
+      --text: #e8eefc;
+      --muted: #93a4c3;
+      --panel: rgba(12, 18, 36, 0.72);
+      --panel-border: rgba(148, 163, 184, 0.22);
+      --panel-glow: rgba(56, 189, 248, 0.12);
+      --cube-size: clamp(110px, 18vmin, 200px);
+      --half: calc(var(--cube-size) / 2);
+      --radius: 16px;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      --font: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --front: #3b82f6;
+      --back: #ef4444;
+      --right: #22c55e;
+      --left: #eab308;
+      --top: #a855f7;
+      --bottom: #f97316;
+
+      /* Shared motion language */
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+      --dur-fast: 0.22s;
+      --dur-ui: 0.35s;
+      --dur-content: 0.45s;
+      --dur-lock: 0.85s;
+      --dur-bg: 0.9s;
+      --stage-glow: 0.18;
+      --stage-scale: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 0.75rem;
+      top: 0.75rem;
+      z-index: 1000;
+      padding: 0.55rem 0.8rem;
+      border-radius: 8px;
+      background: #e2e8f0;
+      color: #0f172a;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      transform: translateY(-150%);
+      transition: transform 0.2s ease;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+      outline: 2px solid #38bdf8;
+      outline-offset: 2px;
+    }
+
+    body {
+      --bg-shift: 0deg;
+      --bg-glow: 0.12;
+      --bg-fx-opacity: 0;
+      position: relative;
+      isolation: isolate;
+      min-height: 100dvh;
+      display: block;
+      padding: 0;
+      color: var(--text);
+      font-family: var(--font);
+      background:
+        radial-gradient(ellipse 80% 55% at 15% 10%, rgba(56, 189, 248, var(--bg-glow)), transparent 50%),
+        radial-gradient(ellipse 70% 50% at 85% 20%, rgba(168, 85, 247, 0.12), transparent 45%),
+        radial-gradient(ellipse 60% 45% at 50% 100%, rgba(59, 130, 246, 0.1), transparent 50%),
+        linear-gradient(160deg, var(--bg-2), var(--bg-1) 40%, var(--bg-0));
+      background-size: 100% 100%;
+      user-select: none;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      cursor: pointer;
+      transition:
+        --bg-glow var(--dur-bg) var(--ease-soft),
+        --bg-fx-opacity var(--dur-bg) var(--ease-soft),
+        --stage-glow var(--dur-bg) var(--ease-soft),
+        --stage-scale var(--dur-lock) var(--ease-out);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: var(--bg-fx-opacity);
+      will-change: transform, opacity;
+      transition: opacity var(--dur-bg) var(--ease-soft);
+      animation-duration: 14s;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      animation-play-state: paused;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 20% 25%, rgba(56, 189, 248, 0.28), transparent 32%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.24), transparent 34%),
+        radial-gradient(circle at 50% 80%, rgba(34, 197, 94, 0.14), transparent 36%);
+      filter: blur(30px) saturate(1.15);
+      transform-origin: center;
+      animation-name: bg-drift;
+    }
+
+    body::after {
+      background:
+        conic-gradient(
+          from var(--bg-shift),
+          rgba(56, 189, 248, 0.08),
+          rgba(168, 85, 247, 0.1),
+          rgba(34, 197, 94, 0.06),
+          rgba(249, 115, 22, 0.08),
+          rgba(239, 68, 68, 0.07),
+          rgba(56, 189, 248, 0.08)
+        );
+      mask-image: radial-gradient(circle at center, transparent 18%, black 48%, transparent 78%);
+      -webkit-mask-image: radial-gradient(circle at center, transparent 18%, black 48%, transparent 78%);
+      mix-blend-mode: screen;
+      filter: blur(18px);
+      animation-name: bg-sweep;
+      animation-duration: 12s;
+      animation-timing-function: linear;
+      animation-direction: normal;
+    }
+
+    /* Auto-rotate: lively background */
+    body.is-auto-spinning {
+      --bg-glow: 0.2;
+      --bg-fx-opacity: 1;
+      --stage-glow: 0.28;
+      --stage-scale: 1;
+      animation: bg-pulse 4.5s var(--ease-soft) infinite;
+    }
+
+    body.is-auto-spinning::before,
+    body.is-auto-spinning::after {
+      animation-play-state: running;
+    }
+
+    /* Locked face: calm, settled background */
+    body.is-focused {
+      cursor: default;
+      --bg-glow: 0.1;
+      --bg-fx-opacity: 0;
+      --stage-glow: 0.14;
+      --stage-scale: 1.015;
+      animation: none;
+    }
+
+    body.is-focused::before,
+    body.is-focused::after {
+      animation-play-state: paused;
+    }
+
+    body.is-focused .faces-panel,
+    body.is-focused .face,
+    body.is-focused .face-btn {
+      cursor: pointer;
+    }
+
+    @keyframes bg-drift {
+      0% {
+        transform: translate3d(-2%, -1%, 0) scale(1) rotate(0deg);
+      }
+      50% {
+        transform: translate3d(3%, 2%, 0) scale(1.08) rotate(8deg);
+      }
+      100% {
+        transform: translate3d(1%, -3%, 0) scale(1.04) rotate(-6deg);
+      }
+    }
+
+    @keyframes bg-sweep {
+      from {
+        --bg-shift: 0deg;
+        transform: scale(1) rotate(0deg);
+      }
+      to {
+        --bg-shift: 360deg;
+        transform: scale(1.04) rotate(360deg);
+      }
+    }
+
+    @keyframes bg-pulse {
+      0%, 100% { --bg-glow: 0.16; }
+      50% { --bg-glow: 0.24; }
+    }
+
+    @property --bg-shift {
+      syntax: "<angle>";
+      inherits: true;
+      initial-value: 0deg;
+    }
+
+    @property --bg-glow {
+      syntax: "<number>";
+      inherits: false;
+      initial-value: 0.12;
+    }
+
+    @property --bg-fx-opacity {
+      syntax: "<number>";
+      inherits: false;
+      initial-value: 0;
+    }
+
+    @property --stage-glow {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 0.18;
+    }
+
+    @property --stage-scale {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 1;
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      width: 100%;
+      min-height: 100dvh;
+      height: 100dvh;
+    }
+
+    .pane {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      padding: clamp(0.85rem, 2vw, 1.4rem);
+      border-right: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .pane:last-child {
+      border-right: none;
+    }
+
+    .pane-label {
+      margin-bottom: 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition:
+        color var(--dur-content) var(--ease-soft),
+        opacity var(--dur-ui) var(--ease-soft),
+        transform var(--dur-ui) var(--ease-out);
+    }
+
+    .pane-label.is-swapping {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+
+    .pane-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      color: rgba(226, 232, 240, 0.92);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .pane-content .pane-body {
+      position: relative;
+      display: block;
+      gap: 0;
+      overflow: hidden;
+      padding-right: 0;
+    }
+
+    .face-template {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      padding-right: 0.25rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(14px) scale(0.985);
+      filter: blur(4px);
+      transition:
+        opacity var(--dur-content) var(--ease-soft),
+        transform var(--dur-content) var(--ease-out),
+        filter var(--dur-content) var(--ease-soft),
+        visibility 0s linear var(--dur-content);
+      z-index: 0;
+    }
+
+    .face-template.is-active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: none;
+      filter: none;
+      transition:
+        opacity var(--dur-content) var(--ease-soft),
+        transform var(--dur-content) var(--ease-out),
+        filter var(--dur-content) var(--ease-soft),
+        visibility 0s linear 0s;
+      z-index: 2;
+    }
+
+    .face-template.is-leaving {
+      opacity: 0;
+      visibility: visible;
+      pointer-events: none;
+      transform: translateY(-10px) scale(0.99);
+      filter: blur(3px);
+      transition:
+        opacity 0.28s var(--ease-soft),
+        transform 0.28s var(--ease-soft),
+        filter 0.28s var(--ease-soft),
+        visibility 0s linear 0.28s;
+      z-index: 1;
+    }
+
+    .face-template.is-entering {
+      opacity: 0;
+      visibility: visible;
+      pointer-events: none;
+      transform: translateY(16px) scale(0.98);
+      filter: blur(5px);
+      z-index: 3;
+    }
+
+    .face-template .content-section {
+      opacity: 0;
+      transform: translateY(12px);
+      transition:
+        opacity 0.4s var(--ease-soft),
+        transform 0.45s var(--ease-out),
+        border-color var(--dur-content) var(--ease-soft),
+        box-shadow var(--dur-content) var(--ease-soft);
+    }
+
+    .face-template.is-active .content-section {
+      opacity: 1;
+      transform: none;
+    }
+
+    .face-template.is-active .content-section.is-points {
+      transition-delay: 0.06s;
+    }
+
+    .face-template.is-active .content-section.is-media {
+      transition-delay: 0.14s;
+    }
+
+    .face-template.is-leaving .content-section {
+      opacity: 0;
+      transform: translateY(-8px);
+      transition-duration: 0.22s;
+      transition-delay: 0s;
+    }
+
+    .face-template .content-list li {
+      opacity: 0;
+      transform: translateX(-8px);
+      transition:
+        opacity 0.35s var(--ease-soft),
+        transform 0.4s var(--ease-out);
+    }
+
+    .face-template.is-active .content-list li {
+      opacity: 1;
+      transform: none;
+    }
+
+    .face-template.is-active .content-list li:nth-child(1) { transition-delay: 0.1s; }
+    .face-template.is-active .content-list li:nth-child(2) { transition-delay: 0.14s; }
+    .face-template.is-active .content-list li:nth-child(3) { transition-delay: 0.18s; }
+    .face-template.is-active .content-list li:nth-child(4) { transition-delay: 0.22s; }
+    .face-template.is-active .content-list li:nth-child(5) { transition-delay: 0.26s; }
+    .face-template.is-active .content-list li:nth-child(6) { transition-delay: 0.3s; }
+    .face-template.is-active .content-list li:nth-child(7) { transition-delay: 0.34s; }
+    .face-template.is-active .content-list li:nth-child(8) { transition-delay: 0.38s; }
+
+    .face-template.is-leaving .content-list li {
+      opacity: 0;
+      transform: translateX(6px);
+      transition-duration: 0.18s;
+      transition-delay: 0s;
+    }
+
+    .face-template .content-gallery figure {
+      opacity: 0;
+      transform: translateY(14px) scale(0.97);
+      transition:
+        opacity 0.4s var(--ease-soft),
+        transform 0.45s var(--ease-out);
+    }
+
+    .face-template.is-active .content-gallery figure {
+      opacity: 1;
+      transform: none;
+    }
+
+    .face-template.is-active .content-gallery figure:nth-child(1) { transition-delay: 0.18s; }
+    .face-template.is-active .content-gallery figure:nth-child(2) { transition-delay: 0.26s; }
+
+    .face-template.is-leaving .content-gallery figure {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+      transition-duration: 0.2s;
+      transition-delay: 0s;
+    }
+
+    .content-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      padding: 1.1rem 1.15rem 1.2rem;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(2, 6, 23, 0.28);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .face-template.is-active .content-section {
+      border-color: color-mix(in srgb, var(--face-accent, #7dd3fc) 28%, rgba(148, 163, 184, 0.14));
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--face-accent, #7dd3fc) 10%, transparent);
+    }
+
+    .content-section.is-points {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .content-section.is-media {
+      flex: 0 0 auto;
+    }
+
+    .content-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      width: fit-content;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--face-accent, #7dd3fc) 45%, transparent);
+      background: color-mix(in srgb, var(--face-accent, #7dd3fc) 16%, transparent);
+      color: color-mix(in srgb, var(--face-accent, #7dd3fc) 85%, white);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .content-section h3 {
+      font-size: clamp(1.15rem, 2vw, 1.45rem);
+      font-weight: 750;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .content-section p {
+      color: rgba(147, 164, 195, 0.95);
+      max-width: 62ch;
+    }
+
+    .content-list {
+      display: grid;
+      gap: 0.75rem;
+      padding-left: 1.2rem;
+      color: rgba(226, 232, 240, 0.95);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .content-list li {
+      padding-left: 0.2rem;
+    }
+
+    .content-list li::marker {
+      color: var(--face-accent, #7dd3fc);
+    }
+
+    .content-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .content-gallery figure {
+      margin: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    .content-gallery img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      background:
+        linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(168, 85, 247, 0.16));
+    }
+
+    .content-gallery figcaption {
+      padding: 0.5rem 0.65rem 0.6rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .face-template[data-face="front"]  { --face-accent: #60a5fa; }
+    .face-template[data-face="back"]   { --face-accent: #f87171; }
+    .face-template[data-face="right"]  { --face-accent: #4ade80; }
+    .face-template[data-face="left"]   { --face-accent: #facc15; }
+    .face-template[data-face="top"]    { --face-accent: #c084fc; }
+    .face-template[data-face="bottom"] { --face-accent: #fb923c; }
+    .face-template[data-face="overview"] { --face-accent: #7dd3fc; }
+
+    .pane-cube {
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.35), rgba(2, 6, 23, 0.18));
+    }
+
+    .pane-cube .pane-body {
+      align-items: stretch;
+      justify-content: space-between;
+      gap: clamp(0.75rem, 2vh, 1.15rem);
+    }
+
+    .stage-wrap {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: clamp(180px, 28vh, 320px);
+      max-height: none;
+      aspect-ratio: auto;
+      cursor: grab;
+      touch-action: none;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      background: rgba(2, 6, 23, 0.2);
+    }
+
+    .stage-wrap.is-dragging {
+      cursor: grabbing;
+      border-color: rgba(125, 211, 252, 0.28);
+    }
+
+    .cube-stage {
+      position: relative;
+      width: var(--cube-size);
+      height: var(--cube-size);
+      transform: scale(var(--stage-scale));
+      transition:
+        transform var(--dur-lock) var(--ease-out);
+    }
+
+    body.is-focused .cube-stage.is-rotating {
+      transform: scale(calc(var(--stage-scale) * 1.02));
+    }
+
+    .cube-stage::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 160%;
+      height: 160%;
+      translate: -50% -50%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96, 165, 250, var(--stage-glow)), transparent 62%);
+      filter: blur(8px);
+      pointer-events: none;
+      z-index: 0;
+      transition:
+        background var(--dur-bg) var(--ease-soft),
+        opacity var(--dur-bg) var(--ease-soft),
+        transform var(--dur-lock) var(--ease-out);
+    }
+
+    body.is-auto-spinning .cube-stage::before {
+      animation: stage-glow-pulse 4.5s var(--ease-soft) infinite;
+    }
+
+    body.is-focused .cube-stage::before {
+      animation: none;
+      opacity: 0.85;
+    }
+
+    @keyframes stage-glow-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+      50% { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+    }
+
+    .cube-stage::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -18%;
+      width: 78%;
+      height: 18%;
+      translate: -50% 0;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(0, 0, 0, 0.55), transparent 70%);
+      filter: blur(10px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scene {
+      position: relative;
+      width: var(--cube-size);
+      height: var(--cube-size);
+      perspective: calc(var(--cube-size) * 3.2);
+      perspective-origin: 50% 45%;
+      z-index: 1;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-18deg) rotateY(25deg) rotateZ(0deg);
+      transition: transform var(--dur-lock) var(--ease-out);
+      will-change: transform;
+    }
+
+    .cube.is-auto-spinning {
+      transition: none;
+    }
+
+    .cube.is-locking {
+      transition: transform var(--dur-lock) var(--ease-out);
+    }
+
+    .face {
+      --face-lift: 0px;
+      appearance: none;
+      -webkit-appearance: none;
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      width: var(--cube-size);
+      height: var(--cube-size);
+      margin: 0;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 10px;
+      font: inherit;
+      font-size: clamp(0.85rem, 3.2vmin, 1.15rem);
+      font-weight: 650;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -18px 40px rgba(0, 0, 0, 0.22),
+        0 0 24px rgba(255, 255, 255, 0.04);
+      backface-visibility: hidden;
+      opacity: 0.94;
+      overflow: hidden;
+      cursor: pointer;
+      transition:
+        filter var(--dur-fast) var(--ease-soft),
+        opacity var(--dur-fast) var(--ease-soft),
+        box-shadow var(--dur-ui) var(--ease-soft),
+        border-color var(--dur-fast) var(--ease-soft),
+        transform var(--dur-ui) var(--ease-out);
+    }
+
+    .face::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 42%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.18), transparent 55%);
+      opacity: 1;
+      transition: opacity 0.22s ease, background 0.22s ease;
+      pointer-events: none;
+    }
+
+    .face::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.35), transparent 55%);
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      pointer-events: none;
+    }
+
+    .face span {
+      position: relative;
+      z-index: 1;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), letter-spacing 0.28s ease;
+    }
+
+    .face:hover,
+    .face:focus-visible {
+      opacity: 1;
+      filter: brightness(1.18) saturate(1.08);
+      border-color: rgba(255, 255, 255, 0.7);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -18px 40px rgba(0, 0, 0, 0.18),
+        0 0 28px rgba(255, 255, 255, 0.18),
+        0 0 42px color-mix(in srgb, var(--face-glow) 55%, transparent);
+      outline: none;
+    }
+
+    .face:hover::before,
+    .face:focus-visible::before {
+      opacity: 1;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 46%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.1), transparent 55%);
+    }
+
+    .face:hover::after,
+    .face:focus-visible::after {
+      opacity: 0.85;
+      transform: scale(1);
+    }
+
+    .face:hover span,
+    .face:focus-visible span {
+      transform: scale(1.06);
+      letter-spacing: 0.12em;
+    }
+
+    .face:active {
+      filter: brightness(1.08);
+    }
+
+    .front  {
+      --face-glow: #60a5fa;
+      background: linear-gradient(145deg, #60a5fa, #2563eb 55%, #1d4ed8);
+      transform: rotateY(0deg) translateZ(calc(var(--half) + var(--face-lift)));
+    }
+    .back   {
+      --face-glow: #f87171;
+      background: linear-gradient(145deg, #f87171, #ef4444 55%, #b91c1c);
+      transform: rotateY(180deg) translateZ(calc(var(--half) + var(--face-lift)));
+    }
+    .right  {
+      --face-glow: #4ade80;
+      background: linear-gradient(145deg, #4ade80, #22c55e 55%, #15803d);
+      transform: rotateY(90deg) translateZ(calc(var(--half) + var(--face-lift)));
+    }
+    .left   {
+      --face-glow: #facc15;
+      background: linear-gradient(145deg, #facc15, #eab308 55%, #a16207);
+      transform: rotateY(-90deg) translateZ(calc(var(--half) + var(--face-lift)));
+    }
+    .top    {
+      --face-glow: #c084fc;
+      background: linear-gradient(145deg, #c084fc, #a855f7 55%, #7e22ce);
+      transform: rotateX(90deg) translateZ(calc(var(--half) + var(--face-lift)));
+    }
+    .bottom {
+      --face-glow: #fb923c;
+      background: linear-gradient(145deg, #fb923c, #f97316 55%, #c2410c);
+      transform: rotateX(-90deg) translateZ(calc(var(--half) + var(--face-lift)));
+    }
+
+    .face:hover,
+    .face:focus-visible {
+      --face-lift: 14px;
+    }
+
+    .faces-panel {
+      --control-gap: 0.65rem;
+      --touch-min: 2.5rem;
+      position: relative;
+      left: auto;
+      bottom: auto;
+      translate: none;
+      width: min(100%, 420px);
+      max-width: 100%;
+      flex: 0 0 auto;
+      margin-inline: auto;
+      padding: 0.9rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 28%),
+        var(--panel);
+      backdrop-filter: blur(18px) saturate(1.25);
+      -webkit-backdrop-filter: blur(18px) saturate(1.25);
+      box-shadow:
+        var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 40px var(--panel-glow);
+      z-index: 10;
+      transition:
+        border-color var(--dur-bg) var(--ease-soft),
+        box-shadow var(--dur-bg) var(--ease-soft);
+    }
+
+    .faces-panel h2 {
+      margin: 0 0 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .faces-panel h2.faces-subheading {
+      margin-top: 0.85rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .faces-hint {
+      margin: 0 0 0.75rem;
+      min-height: 1.4em;
+      font-size: clamp(0.7rem, 2.2vw, 0.76rem);
+      color: rgba(147, 164, 195, 0.85);
+      text-align: center;
+      line-height: 1.45;
+      opacity: 1;
+      transition:
+        opacity var(--dur-ui) var(--ease-soft),
+        color var(--dur-ui) var(--ease-soft);
+    }
+
+    .faces-hint.is-updating {
+      opacity: 0;
+    }
+
+    body.is-auto-spinning .faces-hint {
+      color: rgba(125, 211, 252, 0.9);
+    }
+
+    body.is-focused .faces-hint {
+      color: rgba(186, 230, 253, 0.88);
+    }
+
+    body.is-inspecting .faces-hint {
+      color: rgba(253, 230, 138, 0.95);
+    }
+
+    body.is-auto-spinning .faces-panel {
+      border-color: rgba(56, 189, 248, 0.28);
+      box-shadow:
+        var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 40px rgba(56, 189, 248, 0.16);
+    }
+
+    body.is-focused .faces-panel {
+      border-color: rgba(148, 163, 184, 0.22);
+      box-shadow:
+        var(--shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 28px rgba(15, 23, 42, 0.35);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: var(--control-gap) 0.85rem;
+      align-items: center;
+    }
+
+    .orbit-controls {
+      display: grid;
+      grid-template-columns: repeat(3, var(--touch-min));
+      grid-template-rows: repeat(3, var(--touch-min));
+      gap: 0.4rem;
+      place-content: center;
+      justify-self: center;
+    }
+
+    .orbit-btn,
+    .orbit-action,
+    .face-btn {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .orbit-btn {
+      appearance: none;
+      min-width: var(--touch-min);
+      min-height: var(--touch-min);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 11px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition:
+        background var(--dur-fast) var(--ease-soft),
+        border-color var(--dur-fast) var(--ease-soft),
+        transform var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur-fast) var(--ease-soft);
+    }
+
+    .orbit-btn:hover {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: rgba(125, 211, 252, 0.45);
+    }
+
+    .orbit-btn:focus-visible,
+    .orbit-action:focus-visible,
+    .face-btn:focus-visible {
+      outline: 2px solid rgba(125, 211, 252, 0.85);
+      outline-offset: 2px;
+    }
+
+    .orbit-btn:active {
+      transform: scale(0.96);
+    }
+
+    .orbit-btn[data-orbit="up"] { grid-column: 2; grid-row: 1; }
+    .orbit-btn[data-orbit="left"] { grid-column: 1; grid-row: 2; }
+    .orbit-btn[data-orbit="right"] { grid-column: 3; grid-row: 2; }
+    .orbit-btn[data-orbit="down"] { grid-column: 2; grid-row: 3; }
+
+    .orbit-side {
+      display: grid;
+      gap: 0.55rem;
+      min-width: 0;
+    }
+
+    .orbit-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.35rem 0.65rem;
+      padding: 0.45rem 0.55rem;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(2, 6, 23, 0.35);
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .orbit-meta output {
+      color: #cbd5e1;
+      font-family: ui-monospace, monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.01em;
+    }
+
+    .orbit-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+
+    .orbit-action {
+      appearance: none;
+      min-height: var(--touch-min);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 10px;
+      padding: 0.55rem 0.45rem;
+      background: rgba(30, 41, 59, 0.85);
+      color: #e2e8f0;
+      font-size: 0.74rem;
+      font-weight: 650;
+      cursor: pointer;
+      transition:
+        background var(--dur-fast) var(--ease-soft),
+        border-color var(--dur-fast) var(--ease-soft),
+        transform var(--dur-fast) var(--ease-out);
+    }
+
+    .orbit-action:hover {
+      border-color: rgba(125, 211, 252, 0.4);
+      background: rgba(51, 65, 85, 0.95);
+    }
+
+    .orbit-action:active {
+      transform: scale(0.98);
+    }
+
+    .face-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    .face-btn {
+      appearance: none;
+      min-height: var(--touch-min);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 12px;
+      padding: 0.7rem 0.4rem;
+      color: #fff;
+      font: inherit;
+      font-size: clamp(0.72rem, 1.8vw, 0.84rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(145deg, var(--btn-from), var(--btn-to));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        0 8px 18px rgba(0, 0, 0, 0.22);
+      transition:
+        transform var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur-ui) var(--ease-soft),
+        filter var(--dur-fast) var(--ease-soft),
+        border-color var(--dur-fast) var(--ease-soft);
+    }
+
+    .face-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        0 10px 22px rgba(0, 0, 0, 0.28);
+    }
+
+    .face-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .face-btn.active {
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 0 0 2px rgba(255, 255, 255, 0.18),
+        0 0 24px color-mix(in srgb, var(--btn-to) 45%, transparent);
+    }
+
+    .face-btn[data-face="front"]  { --btn-from: #60a5fa; --btn-to: #1d4ed8; }
+    .face-btn[data-face="back"]   { --btn-from: #f87171; --btn-to: #b91c1c; }
+    .face-btn[data-face="right"]  { --btn-from: #4ade80; --btn-to: #15803d; }
+    .face-btn[data-face="left"]   { --btn-from: #facc15; --btn-to: #a16207; }
+    .face-btn[data-face="top"]    { --btn-from: #c084fc; --btn-to: #7e22ce; }
+    .face-btn[data-face="bottom"] { --btn-from: #fb923c; --btn-to: #c2410c; }
+
+    .desktop-only-hint {
+      display: block;
+      margin-top: 0.65rem;
+      font-size: 0.68rem;
+      color: rgba(148, 163, 184, 0.75);
+      text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: minmax(0, 1.35fr) minmax(300px, 1fr);
+      }
+    }
+
+    @media (max-width: 960px) {
+      body {
+        overflow: auto;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(52dvh, auto) auto;
+        height: auto;
+        min-height: 100dvh;
+      }
+
+      .pane {
+        border-right: none;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+
+      .pane:last-child {
+        border-bottom: none;
+      }
+
+      .pane-content {
+        order: 2;
+        min-height: 40dvh;
+      }
+
+      .pane-content .pane-body {
+        overflow: visible;
+        position: relative;
+        min-height: 320px;
+      }
+
+      .pane-content .face-template {
+        position: relative;
+        inset: auto;
+        height: auto;
+        min-height: 0;
+      }
+
+      .pane-cube {
+        order: 1;
+        min-height: 0;
+        padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
+      }
+
+      .pane-cube .pane-body {
+        gap: 0.85rem;
+      }
+
+      .stage-wrap {
+        min-height: clamp(220px, 36dvh, 360px);
+      }
+
+      .faces-panel {
+        width: 100%;
+        max-width: none;
+        padding: 0.85rem;
+      }
+
+      .controls-grid {
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: stretch;
+      }
+
+      .desktop-only-hint {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      :root {
+        --cube-size: clamp(130px, 38vw, 190px);
+        --touch-min: 2.75rem;
+      }
+
+      .faces-panel {
+        --touch-min: 2.75rem;
+        padding: 0.8rem;
+        border-radius: 14px;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 0.75rem;
+      }
+
+      .orbit-side {
+        width: 100%;
+      }
+
+      .orbit-controls {
+        grid-template-columns: repeat(3, var(--touch-min));
+        grid-template-rows: repeat(3, var(--touch-min));
+      }
+
+      .orbit-meta {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .orbit-meta output {
+        width: 100%;
+        text-align: center;
+        font-size: 0.72rem;
+      }
+
+      .orbit-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .face-buttons {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.45rem;
+      }
+
+      .face-btn {
+        min-height: 2.75rem;
+        padding: 0.65rem 0.25rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.03em;
+      }
+
+      .faces-hint {
+        margin-bottom: 0.65rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .face-buttons {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .orbit-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .orbit-action {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (min-width: 961px) and (max-height: 820px) {
+      .stage-wrap {
+        min-height: 160px;
+      }
+
+      .faces-panel {
+        padding: 0.75rem;
+      }
+
+      .faces-panel h2.faces-subheading {
+        margin-top: 0.65rem;
+        padding-top: 0.55rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cube,
+      .cube-stage,
+      .face,
+      .face::before,
+      .face::after,
+      .face span,
+      .face-btn,
+      .face-template,
+      .face-template .content-section,
+      .face-template .content-list li,
+      .face-template .content-gallery figure,
+      .pane-label {
+        transition: none !important;
+      }
+
+      body,
+      body::before,
+      body::after,
+      body.is-auto-spinning,
+      body.is-auto-spinning::before,
+      body.is-auto-spinning::after {
+        animation: none !important;
+      }
+
+      .cube-stage.is-rotating {
+        transform: none;
+      }
+
+      .face:hover,
+      .face:focus-visible {
+        --face-lift: 0px;
+      }
+    }
+
+    @media (hover: none) {
+      .face:hover {
+        --face-lift: 0px;
+        filter: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <a class="skip-link" href="#facesPanel">Skip to cube controls</a>
+
+    <section class="pane pane-content" aria-label="Content">
+      <div class="pane-label" id="contentPaneLabel">Content · Overview</div>
+      <div class="pane-body" id="contentPaneBody" aria-live="polite" aria-atomic="true">
+
+        <!-- Default template while auto-rotating -->
+        <div class="face-template is-active" data-face="overview" id="template-overview">
+          <article class="content-section is-points">
+            <span class="content-kicker">Overview</span>
+            <h3>Explore the cube topics</h3>
+            <p>Select a face on the right to load its dedicated content template here.</p>
+            <ul class="content-list">
+              <li>Each face has its own title, bullet list, and two images</li>
+              <li>Front introduces the product vision and core promise</li>
+              <li>Back covers challenges, risks, and reverse angles</li>
+              <li>Right focuses on growth, momentum, and next actions</li>
+              <li>Left captures context, constraints, and supporting detail</li>
+              <li>Top highlights strategy, ambition, and long-range goals</li>
+              <li>Bottom grounds the story in foundations and operations</li>
+              <li>Click background space anytime to return to this overview</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Reference images</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=900&q=80" alt="Blue geometric structure" />
+                <figcaption>System overview</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=900&q=80" alt="Soft multicolor gradient" />
+                <figcaption>Topic palette</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+        <!-- FRONT template -->
+        <div class="face-template" data-face="front" id="template-front">
+          <article class="content-section is-points">
+            <span class="content-kicker">Front</span>
+            <h3>Vision and first impression</h3>
+            <p>The entry face: what someone should understand in the first few seconds.</p>
+            <ul class="content-list">
+              <li>Lead with the clearest value statement</li>
+              <li>Show the primary user problem being solved</li>
+              <li>Keep the language short enough to scan while the cube is locked</li>
+              <li>Highlight the one action you want the viewer to take next</li>
+              <li>Use blue accents to signal trust and clarity</li>
+              <li>Pair the message with a clean, structural visual</li>
+              <li>Make this the default story when presenting live</li>
+              <li>Update this list with your product pitch bullets</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Front visuals</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=900&q=80" alt="Blue glass architecture" />
+                <figcaption>Clarity and structure</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=900&q=80" alt="Blue light beams" />
+                <figcaption>Signal and focus</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+        <!-- BACK template -->
+        <div class="face-template" data-face="back" id="template-back">
+          <article class="content-section is-points">
+            <span class="content-kicker">Back</span>
+            <h3>Challenges and reverse view</h3>
+            <p>The opposite angle: friction, objections, and what sits behind the pitch.</p>
+            <ul class="content-list">
+              <li>Call out the main risks or blockers honestly</li>
+              <li>Explain what happens if the problem stays unsolved</li>
+              <li>List common objections and the short rebuttal for each</li>
+              <li>Show dependencies that are easy to overlook</li>
+              <li>Use red accents for urgency without sounding alarming</li>
+              <li>Keep one bullet for “what we will not do”</li>
+              <li>Add evidence or lessons learned from past attempts</li>
+              <li>End with the recovery path back to the front vision</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Back visuals</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=900&q=80" alt="Deep red abstract gradient" />
+                <figcaption>Pressure and contrast</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=900&q=80" alt="Dark purple and red waves" />
+                <figcaption>Hidden complexity</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+        <!-- RIGHT template -->
+        <div class="face-template" data-face="right" id="template-right">
+          <article class="content-section is-points">
+            <span class="content-kicker">Right</span>
+            <h3>Growth and momentum</h3>
+            <p>Forward motion: opportunities, expansion, and near-term wins.</p>
+            <ul class="content-list">
+              <li>List the next three growth bets in priority order</li>
+              <li>Define what “good” looks like in 30 / 60 / 90 days</li>
+              <li>Call out the audience or market segment to unlock first</li>
+              <li>Map the quickest path from demo to adoption</li>
+              <li>Use green accents to signal progress and health</li>
+              <li>Include one metric that proves momentum</li>
+              <li>Note partnerships or channels that amplify reach</li>
+              <li>Keep a bullet for the single biggest unlock this quarter</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Right visuals</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80" alt="Earth from space at night" />
+                <figcaption>Scale and reach</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80" alt="Analytics dashboard on laptop" />
+                <figcaption>Signals of growth</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+        <!-- LEFT template -->
+        <div class="face-template" data-face="left" id="template-left">
+          <article class="content-section is-points">
+            <span class="content-kicker">Left</span>
+            <h3>Context and constraints</h3>
+            <p>Supporting detail: environment, limits, and the frame around the decision.</p>
+            <ul class="content-list">
+              <li>Describe the current operating environment</li>
+              <li>List hard constraints (time, budget, compliance, tech)</li>
+              <li>Name the stakeholders who must stay aligned</li>
+              <li>Capture assumptions that still need validation</li>
+              <li>Use yellow accents for attention and caution</li>
+              <li>Include adjacent systems this topic depends on</li>
+              <li>Note what is explicitly out of scope</li>
+              <li>Keep a bullet for open questions to resolve next</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Left visuals</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" alt="Team collaborating in office" />
+                <figcaption>People and process</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=900&q=80" alt="Person working on laptop" />
+                <figcaption>Day-to-day context</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+        <!-- TOP template -->
+        <div class="face-template" data-face="top" id="template-top">
+          <article class="content-section is-points">
+            <span class="content-kicker">Top</span>
+            <h3>Strategy and ambition</h3>
+            <p>The high-level view: direction, principles, and long-range intent.</p>
+            <ul class="content-list">
+              <li>State the north-star outcome in one sentence</li>
+              <li>List the guiding principles that shape decisions</li>
+              <li>Show how this face connects the other five topics</li>
+              <li>Define the 12-month ambition without diving into tasks</li>
+              <li>Use purple accents for elevation and imagination</li>
+              <li>Include strategic bets that require executive buy-in</li>
+              <li>Call out the non-negotiable quality bar</li>
+              <li>End with the story you want leaders to repeat</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Top visuals</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80" alt="Mountain landscape above the clouds" />
+                <figcaption>Horizon view</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=900&q=80" alt="Night sky with stars" />
+                <figcaption>Long-range ambition</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+        <!-- BOTTOM template -->
+        <div class="face-template" data-face="bottom" id="template-bottom">
+          <article class="content-section is-points">
+            <span class="content-kicker">Bottom</span>
+            <h3>Foundations and operations</h3>
+            <p>The base layer: delivery mechanics, reliability, and what keeps things running.</p>
+            <ul class="content-list">
+              <li>List the core systems and owners behind the experience</li>
+              <li>Define the minimum operational checklist</li>
+              <li>Call out monitoring, support, and escalation paths</li>
+              <li>Document the release or rollout rhythm</li>
+              <li>Use orange accents for energy and practicality</li>
+              <li>Include cost, capacity, or reliability guardrails</li>
+              <li>Note the handoff points between teams</li>
+              <li>Keep one bullet for the next foundation improvement</li>
+            </ul>
+          </article>
+          <article class="content-section is-media">
+            <h3>Bottom visuals</h3>
+            <div class="content-gallery">
+              <figure>
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80" alt="Circuit board close-up" />
+                <figcaption>Technical foundation</figcaption>
+              </figure>
+              <figure>
+                <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80" alt="Engineer working with technology" />
+                <figcaption>Operations in practice</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="pane pane-cube" aria-label="Cube">
+      <div class="pane-label">Cube</div>
+      <div class="pane-body">
+        <div class="stage-wrap" id="stageWrap" title="Drag to rotate" role="application" aria-label="Interactive 3D cube. Drag to rotate. Face buttons snap to a side.">
+          <div class="cube-stage">
+            <div class="scene">
+              <div class="cube" id="cube">
+                <button class="face front" type="button" data-face="front" aria-label="Show front face"><span>Front</span></button>
+                <button class="face back" type="button" data-face="back" aria-label="Show back face"><span>Back</span></button>
+                <button class="face right" type="button" data-face="right" aria-label="Show right face"><span>Right</span></button>
+                <button class="face left" type="button" data-face="left" aria-label="Show left face"><span>Left</span></button>
+                <button class="face top" type="button" data-face="top" aria-label="Show top face"><span>Top</span></button>
+                <button class="face bottom" type="button" data-face="bottom" aria-label="Show bottom face"><span>Bottom</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="faces-panel" id="facesPanel" aria-labelledby="showFaceHeading">
+          <h2 id="showFaceHeading">Show face</h2>
+          <p class="faces-hint" id="facesHint" aria-live="polite">Auto-rotating · choose a face to lock</p>
+          <div class="face-buttons" role="group" aria-labelledby="showFaceHeading">
+            <button class="face-btn" type="button" data-face="front" aria-pressed="false">Front</button>
+            <button class="face-btn" type="button" data-face="back" aria-pressed="false">Back</button>
+            <button class="face-btn" type="button" data-face="right" aria-pressed="false">Right</button>
+            <button class="face-btn" type="button" data-face="left" aria-pressed="false">Left</button>
+            <button class="face-btn" type="button" data-face="top" aria-pressed="false">Top</button>
+            <button class="face-btn" type="button" data-face="bottom" aria-pressed="false">Bottom</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const cube = document.getElementById('cube');
+    const stage = document.querySelector('.cube-stage');
+    const stageWrap = document.getElementById('stageWrap');
+    const panel = document.getElementById('facesPanel');
+    const hint = document.getElementById('facesHint');
+    const contentLabel = document.getElementById('contentPaneLabel');
+    const body = document.body;
+    const buttons = Array.from(document.querySelectorAll('.face-btn'));
+    const faceEls = Array.from(document.querySelectorAll('.face'));
+    const templates = Array.from(document.querySelectorAll('.face-template'));
+
+    // Orientations that bring each face toward the camera
+    const FACE_ROTATIONS = {
+      front:  { x: 0,   y: 0,   z: 0 },
+      back:   { x: 0,   y: 180, z: 0 },
+      right:  { x: 0,   y: -90, z: 0 },
+      left:   { x: 0,   y: 90,  z: 0 },
+      top:    { x: -90, y: 0,   z: 0 },
+      bottom: { x: 90,  y: 0,   z: 0 },
+    };
+
+    const FACE_LABELS = {
+      overview: 'Overview',
+      front: 'Front',
+      back: 'Back',
+      right: 'Right',
+      left: 'Left',
+      top: 'Top',
+      bottom: 'Bottom',
+    };
+
+    const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
+    const AUTO_TILT_X = -18;
+    const LOCK_MS = 850; // keep in sync with --dur-lock
+
+    // Faster X-axis pitch so top/bottom faces appear more often
+    const PITCH_SPEED = 1.15; // pitch advances faster than yaw
+    const PITCH_BASE = 6;
+    const PITCH_MAIN = 72; // stronger sweep toward top (~-90) and bottom (~+90)
+    const PITCH_SECONDARY = 16;
+    const ROLL_AMOUNT = 10;
+
+    const KEY_STEP = 8;
+    const ORBIT_STEP = 12;
+    const DRAG_SENSITIVITY = 0.45;
+    const CLICK_DRAG_THRESHOLD = 6;
+
+    let current = { x: AUTO_TILT_X, y: 25, z: 0 };
+    let spinPhase = 25; // accumulated yaw
+    let pitchPhase = 25; // independent faster pitch phase
+    let selectedFace = null;
+    let activeTemplate = 'overview';
+    let autoSpin = true;
+    let inspecting = false;
+    let autoSpinId = null;
+    let rotateTimer = null;
+    let hintTimer = null;
+    let contentTimer = null;
+    let lastFrame = 0;
+
+    let isDragging = false;
+    let dragMoved = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let activePointerId = null;
+    let suppressFaceClick = false;
+
+    function shortestPath(from, to) {
+      const delta = ((to - from + 540) % 360) - 180;
+      return from + delta;
+    }
+
+    // Continuous tumble path that reveals top and bottom faces frequently
+    function sampleSpinPose(yawDeg, pitchDeg = pitchPhase) {
+      const yawRad = yawDeg * Math.PI / 180;
+      const pitchRad = pitchDeg * Math.PI / 180;
+
+      // Accelerated X sweep: peaks near +88° (bottom), troughs near -82° (top).
+      const x =
+        PITCH_BASE +
+        Math.sin(pitchRad) * PITCH_MAIN +
+        Math.sin(pitchRad * 2.1 + 0.5) * PITCH_SECONDARY;
+
+      const y = yawDeg;
+      const z = Math.sin(yawRad * 0.33 + 0.4) * ROLL_AMOUNT;
+
+      return { x, y, z };
+    }
+
+    function setHint() {
+      let nextText;
+      if (autoSpin) {
+        nextText = 'Auto-rotating · choose a face to lock';
+      } else if (selectedFace) {
+        nextText = `Locked on ${selectedFace} · click background to resume`;
+      } else if (inspecting) {
+        nextText = 'Free inspect · drag cube or use face buttons';
+      } else {
+        nextText = 'Paused · choose a face or click background to resume';
+      }
+
+      if (hint.textContent === nextText) return;
+
+      window.clearTimeout(hintTimer);
+      hint.classList.add('is-updating');
+      hintTimer = window.setTimeout(() => {
+        hint.textContent = nextText;
+        hint.classList.remove('is-updating');
+      }, 160);
+    }
+
+    function clearSelection() {
+      selectedFace = null;
+      buttons.forEach((btn) => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+    }
+
+    function showContentTemplate(faceKey) {
+      const key = FACE_LABELS[faceKey] ? faceKey : 'overview';
+      if (key === activeTemplate) {
+        contentLabel.textContent = `Content · ${FACE_LABELS[key]}`;
+        return;
+      }
+
+      const next = templates.find((el) => el.dataset.face === key) ||
+        templates.find((el) => el.dataset.face === 'overview');
+      if (!next) return;
+
+      const currentEl = templates.find((el) => el.dataset.face === activeTemplate);
+
+      window.clearTimeout(contentTimer);
+
+      // Animate pane label swap
+      contentLabel.classList.add('is-swapping');
+      window.setTimeout(() => {
+        contentLabel.textContent = `Content · ${FACE_LABELS[key]}`;
+        contentLabel.classList.remove('is-swapping');
+      }, 160);
+
+      // Leave current template
+      templates.forEach((el) => {
+        el.classList.remove('is-entering');
+        if (el !== currentEl && el !== next) {
+          el.classList.remove('is-active', 'is-leaving');
+        }
+      });
+
+      if (currentEl && currentEl !== next) {
+        currentEl.classList.remove('is-active');
+        currentEl.classList.add('is-leaving');
+      }
+
+      // Enter next template
+      next.classList.add('is-active', 'is-entering');
+      activeTemplate = key;
+
+      // Force reflow so entering transition starts from hidden state
+      void next.offsetWidth;
+
+      requestAnimationFrame(() => {
+        next.classList.remove('is-entering');
+      });
+
+      contentTimer = window.setTimeout(() => {
+        templates.forEach((el) => {
+          if (el !== next) el.classList.remove('is-leaving', 'is-active', 'is-entering');
+        });
+      }, 480);
+    }
+
+    function applyRotation({ x, y, z }, { animate = true } = {}) {
+      if (autoSpin) {
+        cube.classList.add('is-auto-spinning');
+        cube.classList.remove('is-locking');
+        cube.style.transition = 'none';
+        stage.classList.remove('is-rotating');
+      } else if (!animate) {
+        cube.classList.remove('is-auto-spinning', 'is-locking');
+        cube.style.transition = 'none';
+        stage.style.transition = 'none';
+      } else {
+        cube.classList.remove('is-auto-spinning');
+        cube.classList.add('is-locking');
+        cube.style.transition = '';
+        stage.style.transition = '';
+        cube.classList.add('is-rotating');
+        stage.classList.add('is-rotating');
+
+        window.clearTimeout(rotateTimer);
+        rotateTimer = window.setTimeout(() => {
+          cube.classList.remove('is-rotating', 'is-locking');
+          stage.classList.remove('is-rotating');
+        }, LOCK_MS);
+      }
+
+      cube.style.transform =
+        `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`;
+
+      if (!animate && !autoSpin) {
+        void cube.offsetWidth;
+        cube.style.transition = '';
+        stage.style.transition = '';
+      }
+
+      current = { x, y, z };
+    }
+
+    function enterInspectMode({ clearFace = true } = {}) {
+      inspecting = true;
+      body.classList.add('is-inspecting');
+      body.classList.add('is-focused');
+      body.classList.remove('is-auto-spinning');
+
+      if (clearFace) {
+        selectedFace = null;
+        clearSelection();
+        showContentTemplate('overview');
+      }
+
+      setHint();
+    }
+
+    function stopAutoSpin() {
+      autoSpin = false;
+
+      if (autoSpinId) {
+        cancelAnimationFrame(autoSpinId);
+        autoSpinId = null;
+      }
+
+      // Capture final auto-spin pose, then enable transitions for the lock move
+      cube.classList.remove('is-auto-spinning');
+      cube.style.transition = 'none';
+      cube.style.transform =
+        `rotateX(${current.x}deg) rotateY(${current.y}deg) rotateZ(${current.z}deg)`;
+      void cube.offsetWidth;
+
+      body.classList.add('is-focused');
+      body.classList.remove('is-auto-spinning');
+      cube.style.transition = '';
+      setHint();
+    }
+
+    function nudgeOrbit({ dx = 0, dy = 0, dz = 0 } = {}) {
+      if (autoSpin) stopAutoSpin();
+      enterInspectMode({ clearFace: true });
+
+      applyRotation({
+        x: current.x + dx,
+        y: current.y + dy,
+        z: current.z + dz,
+      }, { animate: false });
+    }
+
+    function startAutoSpin() {
+      if (autoSpinId) return;
+
+      autoSpin = true;
+      inspecting = false;
+      selectedFace = null;
+      clearSelection();
+      stage.classList.remove('is-rotating');
+      cube.classList.remove('is-locking');
+
+      // Fade background back to motion first, then resume spin
+      body.classList.remove('is-focused', 'is-inspecting');
+      body.classList.add('is-auto-spinning');
+      showContentTemplate('overview');
+      setHint();
+
+      // Brief ease from locked pose into auto-spin trajectory
+      cube.classList.remove('is-auto-spinning');
+      cube.style.transition = '';
+      // Resume tumble from the current pose so motion stays continuous
+      spinPhase = current.y;
+      pitchPhase = current.x;
+      const easeIn = sampleSpinPose(spinPhase, pitchPhase);
+      cube.style.transform =
+        `rotateX(${easeIn.x}deg) rotateY(${easeIn.y}deg) rotateZ(${easeIn.z}deg)`;
+      current = easeIn;
+
+      window.setTimeout(() => {
+        if (!autoSpin) return;
+        cube.classList.add('is-auto-spinning');
+        cube.style.transition = 'none';
+        lastFrame = performance.now();
+
+        const tick = (now) => {
+          if (!autoSpin) return;
+
+          const dt = Math.min(32, now - lastFrame) / 16.67;
+          lastFrame = now;
+
+          spinPhase += AUTO_SPIN_SPEED * dt;
+          pitchPhase += AUTO_SPIN_SPEED * PITCH_SPEED * dt;
+          current = sampleSpinPose(spinPhase, pitchPhase);
+
+          applyRotation(current, { animate: false });
+          autoSpinId = requestAnimationFrame(tick);
+        };
+
+        autoSpinId = requestAnimationFrame(tick);
+      }, 180);
+    }
+
+    function showFace(face, { animate = true } = {}) {
+      const target = FACE_ROTATIONS[face];
+      if (!target) return;
+
+      stopAutoSpin();
+      inspecting = false;
+      body.classList.remove('is-inspecting');
+      selectedFace = face;
+      showContentTemplate(face);
+
+      // Double-rAF ensures lock transition starts after auto-spin styles settle
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const next = {
+            x: shortestPath(current.x, target.x),
+            y: shortestPath(current.y, target.y),
+            z: shortestPath(current.z, target.z),
+          };
+
+          applyRotation(next, { animate });
+        });
+      });
+
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.face === face;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+
+      setHint();
+    }
+
+    function isInteractiveTarget(target) {
+      return Boolean(
+        target.closest('.faces-panel') ||
+        target.closest('.face') ||
+        target.closest('.face-btn') ||
+        target.closest('.pane-content') ||
+        target.closest('.stage-wrap')
+      );
+    }
+
+    function onPointerDown(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+      isDragging = true;
+      dragMoved = false;
+      suppressFaceClick = false;
+      activePointerId = e.pointerId;
+      dragStartX = lastPointerX = e.clientX;
+      dragStartY = lastPointerY = e.clientY;
+
+      stageWrap.classList.add('is-dragging');
+      stageWrap.setPointerCapture?.(e.pointerId);
+
+      if (autoSpin) stopAutoSpin();
+      enterInspectMode({ clearFace: !selectedFace });
+
+      // Disable transition while dragging for immediate response
+      cube.classList.remove('is-locking');
+      cube.style.transition = 'none';
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging || e.pointerId !== activePointerId) return;
+
+      const dx = e.clientX - lastPointerX;
+      const dy = e.clientY - lastPointerY;
+      lastPointerX = e.clientX;
+      lastPointerY = e.clientY;
+
+      if (!dragMoved) {
+        const totalDx = e.clientX - dragStartX;
+        const totalDy = e.clientY - dragStartY;
+        if (Math.hypot(totalDx, totalDy) >= CLICK_DRAG_THRESHOLD) {
+          dragMoved = true;
+          suppressFaceClick = true;
+          if (selectedFace) {
+            selectedFace = null;
+            clearSelection();
+            showContentTemplate('overview');
+            setHint();
+          }
+        }
+      }
+
+      if (!dragMoved) return;
+
+      applyRotation({
+        x: current.x - dy * DRAG_SENSITIVITY,
+        y: current.y + dx * DRAG_SENSITIVITY,
+        z: current.z,
+      }, { animate: false });
+    }
+
+    function onPointerUp(e) {
+      if (!isDragging || e.pointerId !== activePointerId) return;
+
+      isDragging = false;
+      activePointerId = null;
+      stageWrap.classList.remove('is-dragging');
+      cube.style.transition = '';
+
+      try {
+        stageWrap.releasePointerCapture?.(e.pointerId);
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    buttons.forEach((btn) => {
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showFace(btn.dataset.face);
+      });
+    });
+
+    faceEls.forEach((faceEl) => {
+      faceEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (suppressFaceClick) {
+          suppressFaceClick = false;
+          return;
+        }
+        showFace(faceEl.dataset.face);
+      });
+    });
+
+    stageWrap.addEventListener('pointerdown', onPointerDown);
+    stageWrap.addEventListener('pointermove', onPointerMove);
+    stageWrap.addEventListener('pointerup', onPointerUp);
+    stageWrap.addEventListener('pointercancel', onPointerUp);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.matches('input, textarea, select, button')) return;
+
+      let handled = true;
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          nudgeOrbit({ dy: -KEY_STEP });
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          nudgeOrbit({ dy: KEY_STEP });
+          break;
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          nudgeOrbit({ dx: KEY_STEP });
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          nudgeOrbit({ dx: -KEY_STEP });
+          break;
+        case 'q':
+        case 'Q':
+          nudgeOrbit({ dz: -KEY_STEP });
+          break;
+        case 'e':
+        case 'E':
+          nudgeOrbit({ dz: KEY_STEP });
+          break;
+        case ' ': // space toggles auto-spin
+          e.preventDefault();
+          if (autoSpin) {
+            stopAutoSpin();
+            enterInspectMode({ clearFace: true });
+          } else {
+            startAutoSpin();
+          }
+          break;
+        case 'r':
+        case 'R':
+          if (autoSpin) stopAutoSpin();
+          enterInspectMode({ clearFace: true });
+          applyRotation({ x: AUTO_TILT_X, y: 30, z: 0 }, { animate: true });
+          break;
+        default:
+          handled = false;
+      }
+
+      if (handled) e.preventDefault();
+    });
+
+    panel.addEventListener('click', (e) => e.stopPropagation());
+
+    // Clicking the background resumes auto-rotation
+    body.addEventListener('click', (e) => {
+      if (isInteractiveTarget(e.target)) return;
+      if (autoSpin) return;
+      startAutoSpin();
+    });
+
+    // Start spinning by default with overview content
+    showContentTemplate('overview');
+    pitchPhase = 25;
+    current = sampleSpinPose(spinPhase, pitchPhase);
+    applyRotation(current, { animate: false });
+    startAutoSpin();
+  </script>
+</body>
+</html>
