@@ -18,6 +18,8 @@
       --panel-glow: rgba(56, 189, 248, 0.12);
       --cube-size: clamp(100px, 14vmin, 170px);
       --half: calc(var(--cube-size) / 2);
+      --actor-size: 150px;
+      --pane-pad: clamp(0.85rem, 2vw, 1.25rem);
       --radius: 16px;
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
       --font: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -262,7 +264,7 @@
       flex-direction: column;
       min-width: 0;
       min-height: 0;
-      padding: clamp(0.85rem, 2vw, 1.4rem);
+      padding: var(--pane-pad);
       border-right: 1px solid rgba(148, 163, 184, 0.12);
     }
 
@@ -281,6 +283,18 @@
         color var(--dur-content) var(--ease-soft),
         opacity var(--dur-ui) var(--ease-soft),
         transform var(--dur-ui) var(--ease-out);
+    }
+
+    .pane-label.content-title {
+      max-width: min(48rem, 100%);
+      margin-bottom: 1rem;
+      padding-right: 0.25rem;
+      font-size: clamp(0.8rem, 1.2vw, 1rem);
+      font-weight: 750;
+      letter-spacing: 0.03em;
+      line-height: 1.4;
+      text-transform: none;
+      color: var(--text);
     }
 
     .pane-label.is-swapping {
@@ -310,12 +324,12 @@
       position: absolute;
       inset: 0;
       display: grid;
-      grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+      grid-template-rows: minmax(0, 2fr) minmax(140px, 1fr);
       gap: 0.85rem;
       width: 100%;
       height: 100%;
       overflow: hidden;
-      padding-right: 0.25rem;
+      padding-right: 0.15rem;
       scrollbar-width: thin;
       scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
       opacity: 0;
@@ -481,8 +495,22 @@
     }
 
     .content-section.is-points .points-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
       min-width: 0;
-      padding-right: calc(175px + 1.1rem);
+      /* Reserve space for actor card (image + caption) */
+      padding-right: calc(var(--actor-size) + 1.25rem);
+    }
+
+    /* Extra space between face label (e.g. Overview) and section title */
+    .content-section.is-points .points-main > .content-kicker {
+      display: inline-flex;
+      margin: 0 0 1.75rem;
+    }
+
+    .content-section.is-points .points-main > .content-kicker + h3 {
+      margin-top: 0.75rem;
     }
 
     .actor-card {
@@ -492,7 +520,7 @@
       z-index: 2;
       display: flex;
       flex-direction: column;
-      width: 175px;
+      width: var(--actor-size);
       margin: 0;
       overflow: hidden;
       border-radius: 14px;
@@ -505,8 +533,8 @@
 
     .actor-card img {
       display: block;
-      width: 175px;
-      height: 175px;
+      width: var(--actor-size);
+      height: var(--actor-size);
       object-fit: cover;
       background:
         linear-gradient(145deg, rgba(125, 211, 252, 0.25), rgba(167, 139, 250, 0.28));
@@ -525,16 +553,27 @@
     }
 
     @media (max-width: 720px) {
+      .content-section.is-points {
+        display: flex;
+        flex-direction: column;
+      }
+
       .content-section.is-points .points-main {
+        order: 2;
         padding-right: 0;
+      }
+
+      .content-section.is-points .actor-card {
+        order: 1;
       }
 
       .actor-card {
         position: relative;
         top: auto;
         right: auto;
-        width: min(175px, 100%);
-        margin: 0 0 0.75rem auto;
+        width: min(var(--actor-size), 100%);
+        margin: 0 0 0.85rem 0;
+        align-self: flex-start;
       }
 
       .actor-card img {
@@ -578,10 +617,16 @@
     }
 
     .content-section h3 {
+      margin: 0;
       font-size: clamp(1.15rem, 2vw, 1.45rem);
       font-weight: 750;
       color: var(--text);
       letter-spacing: 0.01em;
+    }
+
+    .content-section.is-points .points-main > h3 {
+      margin-top: 0.5rem;
+      margin-bottom: 0.45rem;
     }
 
     .content-section p {
@@ -657,10 +702,34 @@
         linear-gradient(180deg, rgba(15, 23, 42, 0.35), rgba(2, 6, 23, 0.18));
     }
 
+    .pane-brand {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 0 0 auto;
+      width: 100%;
+      margin: 0 0 0.55rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+    }
+
+    .pane-brand .brand-logo {
+      display: block;
+      width: min(100%, 210px);
+      height: auto;
+      max-height: 58px;
+      object-fit: contain;
+      object-position: center;
+    }
+
     .pane-cube .pane-body {
       align-items: stretch;
-      justify-content: space-between;
-      gap: clamp(0.75rem, 2vh, 1.15rem);
+      justify-content: flex-start;
+      gap: clamp(0.55rem, 1.5vh, 0.85rem);
     }
 
     .stage-wrap {
@@ -668,9 +737,9 @@
       display: grid;
       place-items: center;
       width: 100%;
-      flex: 1 1 auto;
-      min-height: clamp(180px, 28vh, 320px);
-      max-height: none;
+      flex: 0 1 auto;
+      min-height: clamp(140px, 18vh, 220px);
+      max-height: clamp(180px, 26vh, 260px);
       aspect-ratio: auto;
       cursor: grab;
       touch-action: none;
@@ -780,6 +849,8 @@
       inset: 0;
       display: grid;
       place-items: center;
+      text-align: center;
+      line-height: 1.2;
       width: var(--cube-size);
       height: var(--cube-size);
       margin: 0;
@@ -787,9 +858,9 @@
       border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 10px;
       font: inherit;
-      font-size: clamp(0.85rem, 3.2vmin, 1.15rem);
+      font-size: clamp(0.55rem, 1.9vmin, 0.72rem);
       font-weight: 650;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: rgba(255, 255, 255, 0.95);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -841,38 +912,49 @@
     .face:hover,
     .face:focus-visible {
       opacity: 1;
-      filter: brightness(1.18) saturate(1.08);
-      border-color: rgba(255, 255, 255, 0.7);
+      filter: brightness(1.28) saturate(1.15) contrast(1.05);
+      border-color: rgba(255, 255, 255, 0.92);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.45),
-        inset 0 -18px 40px rgba(0, 0, 0, 0.18),
-        0 0 28px rgba(255, 255, 255, 0.18),
-        0 0 42px color-mix(in srgb, var(--face-glow) 55%, transparent);
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -18px 40px rgba(0, 0, 0, 0.14),
+        0 0 0 2px rgba(255, 255, 255, 0.28),
+        0 0 26px rgba(255, 255, 255, 0.22),
+        0 0 48px color-mix(in srgb, var(--face-glow) 65%, transparent);
       outline: none;
+      z-index: 3;
     }
 
     .face:hover::before,
     .face:focus-visible::before {
       opacity: 1;
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 46%),
-        linear-gradient(0deg, rgba(0, 0, 0, 0.1), transparent 55%);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.62), transparent 48%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.08), transparent 55%);
     }
 
     .face:hover::after,
     .face:focus-visible::after {
-      opacity: 0.85;
-      transform: scale(1);
+      opacity: 1;
+      transform: scale(1.08);
+      background: radial-gradient(
+        circle at center,
+        color-mix(in srgb, var(--face-glow) 55%, white),
+        transparent 58%
+      );
     }
 
     .face:hover span,
     .face:focus-visible span {
-      transform: scale(1.06);
-      letter-spacing: 0.12em;
+      transform: scale(1.1);
+      letter-spacing: 0.08em;
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.45),
+        0 0 14px rgba(255, 255, 255, 0.35);
     }
 
     .face:active {
-      filter: brightness(1.08);
+      filter: brightness(1.12) saturate(1.08);
+      --face-lift: 8px;
     }
 
     .front  {
@@ -908,7 +990,7 @@
 
     .face:hover,
     .face:focus-visible {
-      --face-lift: 14px;
+      --face-lift: 18px;
     }
 
     .faces-panel {
@@ -1136,19 +1218,20 @@
       --btn-to: #1e293b;
       appearance: none;
       min-width: 0;
-      min-height: var(--touch-min);
+      min-height: calc(var(--touch-min) + 0.55rem);
       border: 1px solid rgba(148, 163, 184, 0.28);
       border-radius: 10px;
-      padding: 0.65rem 0.55rem;
+      padding: 0.7rem 0.55rem;
       color: rgba(226, 232, 240, 0.92);
       font: inherit;
       font-size: clamp(0.72rem, 1.2vw, 0.85rem);
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      white-space: nowrap;
+      text-align: center;
+      line-height: 1.2;
+      white-space: normal;
       overflow: hidden;
-      text-overflow: ellipsis;
       cursor: pointer;
       opacity: 1;
       background: linear-gradient(145deg, var(--btn-from), var(--btn-to));
@@ -1260,7 +1343,11 @@
         inset: auto;
         height: min(70dvh, 720px);
         min-height: 420px;
-        grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+        grid-template-rows: minmax(0, 2fr) minmax(140px, 1fr);
+      }
+
+      .pane-label.content-title {
+        max-width: none;
       }
 
       .pane-cube {
@@ -1270,11 +1357,17 @@
       }
 
       .pane-cube .pane-body {
-        gap: 0.85rem;
+        gap: 0.7rem;
+      }
+
+      .pane-brand .brand-logo {
+        width: min(100%, 240px);
+        max-height: 64px;
       }
 
       .stage-wrap {
-        min-height: clamp(220px, 36dvh, 360px);
+        min-height: clamp(180px, 28dvh, 280px);
+        max-height: clamp(220px, 34dvh, 320px);
       }
 
       .faces-panel {
@@ -1338,12 +1431,23 @@
     }
 
     @media (min-width: 961px) and (max-height: 820px) {
+      .pane-brand {
+        margin-bottom: 0.4rem;
+        padding: 0.35rem 0.55rem;
+      }
+
+      .pane-brand .brand-logo {
+        max-height: 48px;
+        width: min(100%, 180px);
+      }
+
       .stage-wrap {
-        min-height: 160px;
+        min-height: 130px;
+        max-height: 190px;
       }
 
       .faces-panel {
-        padding: 0.75rem;
+        padding: 0.65rem;
       }
 
       .faces-panel h2.faces-subheading {
@@ -1391,6 +1495,15 @@
       .face:hover {
         --face-lift: 0px;
         filter: none;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.28),
+          inset 0 -18px 40px rgba(0, 0, 0, 0.22),
+          0 0 24px rgba(255, 255, 255, 0.04);
+      }
+
+      .face:active {
+        --face-lift: 10px;
+        filter: brightness(1.16) saturate(1.1);
       }
     }
   </style>
@@ -1400,7 +1513,7 @@
     <a class="skip-link" href="#facesPanel">Skip to cube controls</a>
 
     <section class="pane pane-content" aria-label="Content">
-      <div class="pane-label" id="contentPaneLabel">Content · Overview</div>
+      <div class="pane-label content-title" id="contentPaneLabel">VBCF's Datacube System - Bridging core facility utilisation, billing &amp; reporting</div>
       <div class="pane-body" id="contentPaneBody" aria-live="polite" aria-atomic="true">
 
         <!-- Default template while auto-rotating -->
@@ -1409,8 +1522,8 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-overview.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
@@ -1421,12 +1534,12 @@
             <p>Select a face on the right to load its dedicated content template here.</p>
             <ul class="content-list">
               <li>Each face has its own title, bullet list, and two images</li>
-              <li>Front introduces the product vision and core promise</li>
-              <li>Back covers challenges, risks, and reverse angles</li>
-              <li>Right focuses on growth, momentum, and next actions</li>
-              <li>Left captures context, constraints, and supporting detail</li>
-              <li>Top highlights strategy, ambition, and long-range goals</li>
-              <li>Bottom grounds the story in foundations and operations</li>
+              <li>Core Facility Applications introduces the product vision and core promise</li>
+              <li>Controlling covers challenges, risks, and reverse angles</li>
+              <li>Reporting focuses on growth, momentum, and next actions</li>
+              <li>Billing captures context, constraints, and supporting detail</li>
+              <li>User Management covers strategy, ambition, and long-range goals</li>
+              <li>Service Management grounds the story in foundations and operations</li>
               <li>Click background space anytime to return to this overview</li>
             </ul>
           
@@ -1453,14 +1566,14 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-front.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
             </figure>
             <div class="points-main">
-            <span class="content-kicker">Front</span>
+            <span class="content-kicker">Core Facility Applications</span>
             <h3>Vision and first impression</h3>
             <p>The entry face: what someone should understand in the first few seconds.</p>
             <ul class="content-list">
@@ -1477,7 +1590,7 @@
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Front visuals</h3>
+            <h3>Core Facility Applications visuals</h3>
             <div class="content-gallery">
               <figure>
                 <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=900&q=80" alt="Blue glass architecture" />
@@ -1497,14 +1610,14 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-back.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
             </figure>
             <div class="points-main">
-            <span class="content-kicker">Back</span>
+            <span class="content-kicker">Controlling</span>
             <h3>Challenges and reverse view</h3>
             <p>The opposite angle: friction, objections, and what sits behind the pitch.</p>
             <ul class="content-list">
@@ -1521,7 +1634,7 @@
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Back visuals</h3>
+            <h3>Controlling visuals</h3>
             <div class="content-gallery">
               <figure>
                 <img src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=900&q=80" alt="Deep red abstract gradient" />
@@ -1541,14 +1654,14 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-right.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
             </figure>
             <div class="points-main">
-            <span class="content-kicker">Right</span>
+            <span class="content-kicker">Reporting</span>
             <h3>Growth and momentum</h3>
             <p>Forward motion: opportunities, expansion, and near-term wins.</p>
             <ul class="content-list">
@@ -1565,7 +1678,7 @@
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Right visuals</h3>
+            <h3>Reporting visuals</h3>
             <div class="content-gallery">
               <figure>
                 <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80" alt="Earth from space at night" />
@@ -1585,14 +1698,14 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-left.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
             </figure>
             <div class="points-main">
-            <span class="content-kicker">Left</span>
+            <span class="content-kicker">Billing</span>
             <h3>Context and constraints</h3>
             <p>Supporting detail: environment, limits, and the frame around the decision.</p>
             <ul class="content-list">
@@ -1609,7 +1722,7 @@
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Left visuals</h3>
+            <h3>Billing visuals</h3>
             <div class="content-gallery">
               <figure>
                 <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" alt="Team collaborating in office" />
@@ -1629,14 +1742,14 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-top.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
             </figure>
             <div class="points-main">
-            <span class="content-kicker">Top</span>
+            <span class="content-kicker">User Management</span>
             <h3>Strategy and ambition</h3>
             <p>The high-level view: direction, principles, and long-range intent.</p>
             <ul class="content-list">
@@ -1653,7 +1766,7 @@
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Top visuals</h3>
+            <h3>User Management visuals</h3>
             <div class="content-gallery">
               <figure>
                 <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80" alt="Mountain landscape above the clouds" />
@@ -1673,14 +1786,14 @@
             <figure class="actor-card">
               <img
                 src="assets/actors/actor-bottom.svg"
-                width="175"
-                height="175"
+                width="150"
+                height="150"
                 alt="Actor placeholder portrait"
               />
               <figcaption>ACTOR</figcaption>
             </figure>
             <div class="points-main">
-            <span class="content-kicker">Bottom</span>
+            <span class="content-kicker">Service Management</span>
             <h3>Foundations and operations</h3>
             <p>The base layer: delivery mechanics, reliability, and what keeps things running.</p>
             <ul class="content-list">
@@ -1697,7 +1810,7 @@
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Bottom visuals</h3>
+            <h3>Service Management visuals</h3>
             <div class="content-gallery">
               <figure>
                 <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80" alt="Circuit board close-up" />
@@ -1714,19 +1827,27 @@
       </div>
     </section>
 
-    <section class="pane pane-cube" aria-label="Datacube">
-      <div class="pane-label">Datacube</div>
+    <section class="pane pane-cube" aria-label="Vienna BioCenter Core Facilities cube and features">
+      <div class="pane-brand">
+        <img
+          class="brand-logo"
+          src="assets/branding/vbcf-logo.png"
+          alt="Vienna BioCenter Core Facilities"
+          width="210"
+          height="58"
+        />
+      </div>
       <div class="pane-body">
         <div class="stage-wrap" id="stageWrap" title="Drag to rotate" role="application" aria-label="Interactive 3D datacube. Drag to rotate. Feature buttons snap to a side.">
           <div class="cube-stage">
             <div class="scene">
               <div class="cube" id="cube">
-                <button class="face front" type="button" data-face="front" aria-label="Show front face"><span>Front</span></button>
-                <button class="face back" type="button" data-face="back" aria-label="Show back face"><span>Back</span></button>
-                <button class="face right" type="button" data-face="right" aria-label="Show right face"><span>Right</span></button>
-                <button class="face left" type="button" data-face="left" aria-label="Show left face"><span>Left</span></button>
-                <button class="face top" type="button" data-face="top" aria-label="Show top face"><span>Top</span></button>
-                <button class="face bottom" type="button" data-face="bottom" aria-label="Show bottom face"><span>Bottom</span></button>
+                <button class="face front" type="button" data-face="front" aria-label="Show Core Facility Applications face"><span>Core Facility<br>Applications</span></button>
+                <button class="face back" type="button" data-face="back" aria-label="Show Controlling face"><span>Controlling</span></button>
+                <button class="face right" type="button" data-face="right" aria-label="Show Reporting face"><span>Reporting</span></button>
+                <button class="face left" type="button" data-face="left" aria-label="Show Billing face"><span>Billing</span></button>
+                <button class="face top" type="button" data-face="top" aria-label="Show User Management face"><span>User<br>Management</span></button>
+                <button class="face bottom" type="button" data-face="bottom" aria-label="Show Service Management face"><span>Service<br>Management</span></button>
               </div>
             </div>
           </div>
@@ -1735,12 +1856,12 @@
         <aside class="faces-panel" id="facesPanel" aria-labelledby="featuresHeading">
           <h2 id="featuresHeading">Features</h2>
           <div class="face-buttons" role="group" aria-labelledby="featuresHeading">
-            <button class="face-btn" type="button" data-face="front" aria-pressed="false">Front</button>
-            <button class="face-btn" type="button" data-face="back" aria-pressed="false">Back</button>
-            <button class="face-btn" type="button" data-face="right" aria-pressed="false">Right</button>
-            <button class="face-btn" type="button" data-face="left" aria-pressed="false">Left</button>
-            <button class="face-btn" type="button" data-face="top" aria-pressed="false">Top</button>
-            <button class="face-btn" type="button" data-face="bottom" aria-pressed="false">Bottom</button>
+            <button class="face-btn" type="button" data-face="front" aria-pressed="false">Core Facility<br>Applications</button>
+            <button class="face-btn" type="button" data-face="back" aria-pressed="false">Controlling</button>
+            <button class="face-btn" type="button" data-face="right" aria-pressed="false">Reporting</button>
+            <button class="face-btn" type="button" data-face="left" aria-pressed="false">Billing</button>
+            <button class="face-btn" type="button" data-face="top" aria-pressed="false">User<br>Management</button>
+            <button class="face-btn" type="button" data-face="bottom" aria-pressed="false">Service<br>Management</button>
           </div>
         </aside>
       </div>
@@ -1752,7 +1873,6 @@
     const stage = document.querySelector('.cube-stage');
     const stageWrap = document.getElementById('stageWrap');
     const panel = document.getElementById('facesPanel');
-    const contentLabel = document.getElementById('contentPaneLabel');
     const body = document.body;
     const buttons = Array.from(document.querySelectorAll('.face-btn'));
     const faceEls = Array.from(document.querySelectorAll('.face'));
@@ -1770,12 +1890,12 @@
 
     const FACE_LABELS = {
       overview: 'Overview',
-      front: 'Front',
-      back: 'Back',
-      right: 'Right',
-      left: 'Left',
-      top: 'Top',
-      bottom: 'Bottom',
+      front: 'Core Facility Applications',
+      back: 'Controlling',
+      right: 'Reporting',
+      left: 'Billing',
+      top: 'User Management',
+      bottom: 'Service Management',
     };
 
     const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
@@ -1876,7 +1996,6 @@
     function showContentTemplate(faceKey) {
       const key = FACE_LABELS[faceKey] ? faceKey : 'overview';
       if (key === activeTemplate) {
-        contentLabel.textContent = `Content · ${FACE_LABELS[key]}`;
         return;
       }
 
@@ -1887,13 +2006,6 @@
       const currentEl = templates.find((el) => el.dataset.face === activeTemplate);
 
       window.clearTimeout(contentTimer);
-
-      // Animate pane label swap
-      contentLabel.classList.add('is-swapping');
-      window.setTimeout(() => {
-        contentLabel.textContent = `Content · ${FACE_LABELS[key]}`;
-        contentLabel.classList.remove('is-swapping');
-      }, 160);
 
       // Leave current template
       templates.forEach((el) => {
