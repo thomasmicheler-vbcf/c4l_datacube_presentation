@@ -1848,18 +1848,25 @@
         faceHoldTimer = null;
         // Only resume if still locked on a face and not mid-drag inspect
         if (!autoSpin && selectedFace && !isDragging) {
-          startAutoSpin();
+          // Resume spinning but keep the selected feature button highlighted
+          startAutoSpin({ preserveButtonSelection: true });
         }
       }, FACE_HOLD_MS);
     }
 
+    function setButtonSelection(face) {
+      const hasFace = Boolean(face);
+      panel.classList.toggle('has-selection', hasFace);
+      buttons.forEach((btn) => {
+        const isActive = hasFace && btn.dataset.face === face;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+    }
+
     function clearSelection() {
       selectedFace = null;
-      panel.classList.remove('has-selection');
-      buttons.forEach((btn) => {
-        btn.classList.remove('active');
-        btn.setAttribute('aria-pressed', 'false');
-      });
+      setButtonSelection(null);
     }
 
     function showContentTemplate(faceKey) {
@@ -1997,14 +2004,20 @@
       }, { animate: false });
     }
 
-    function startAutoSpin() {
+    function startAutoSpin({ preserveButtonSelection = false } = {}) {
       if (autoSpinId) return;
 
       clearFaceHoldTimer();
+      const highlightedFace = preserveButtonSelection ? selectedFace : null;
+
       autoSpin = true;
       inspecting = false;
       selectedFace = null;
-      clearSelection();
+      if (preserveButtonSelection && highlightedFace) {
+        setButtonSelection(highlightedFace);
+      } else {
+        clearSelection();
+      }
       stage.classList.remove('is-rotating');
       cube.classList.remove('is-locking');
 
@@ -2071,12 +2084,7 @@
         });
       });
 
-      buttons.forEach((btn) => {
-        const isActive = btn.dataset.face === face;
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-pressed', String(isActive));
-      });
-      panel.classList.add('has-selection');
+      setButtonSelection(face);
 
       // Keep the selected face fixed, then automatically resume rotation
       scheduleFaceHoldResume();
