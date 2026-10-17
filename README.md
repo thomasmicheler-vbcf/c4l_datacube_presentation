@@ -38,36 +38,34 @@ http://localhost:8080/cube.html
 ```text
 ┌──────────────────────────────── layout ────────────────────────────────┐
 │                                                                        │
-│  LEFT: Content pane (~flexible)     RIGHT: Datacube pane (narrow)      │
+│  LEFT: Content pane (~flexible)     RIGHT: cube pane (220–280px)       │
 │  ┌─────────────────────────────┐    ┌──────────────────────────────┐   │
-│  │ Content · <template>        │    │ Datacube                     │   │
+│  │ VBCF Datacube System title  │    │ VBCF logo (white brand box)  │   │
 │  │                             │    │                              │   │
-│  │ TOP (~2/3) points section   │    │  3D cube stage               │   │
+│  │ TOP (~2/3) points section   │    │  3D cube stage (centered)    │   │
 │  │  ┌──────────────────┬─────┐ │    │  (drag to orbit)             │   │
 │  │  │ title/bullets    │ACTOR│ │    │                              │   │
-│  │  │                  │200px│ │    │                              │   │
+│  │  │                  │150px│ │    │                              │   │
 │  │  └──────────────────┴─────┘ │    ├──────────────────────────────┤   │
-│  │                             │    │ Features                     │   │
-│  │ BOTTOM (~1/3) media         │    │  [Front ]                    │   │
-│  │  ┌──────────┬──────────┐    │    │  [Back  ]  vertical stack    │   │
-│  │  │ image 1  │ image 2  │    │    │  [Right ]                    │   │
-│  │  └──────────┴──────────┘    │    │  [Left  ]                    │   │
-│  └─────────────────────────────┘    │  [Top   ]                    │   │
-│                                     │  [Bottom]                    │   │
-│                                     └──────────────────────────────┘   │
+│  │                             │    │ Features (bottom-aligned)    │   │
+│  │ BOTTOM (~1/3) media         │    │  vertical face buttons       │   │
+│  │  ┌──────────┬──────────┐    │    │  selection colors + dimming  │   │
+│  │  │ image 1  │ image 2  │    │    │                              │   │
+│  │  └──────────┴──────────┘    │    └──────────────────────────────┘   │
+│  └─────────────────────────────┘                                       │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Left pane (`pane-content`)
 
-Switches by selected cube face (or overview while auto-spinning / free inspect).
+Switches by selected cube face. Overview shows while free-spinning without a preserved selection.
 
 Each template includes:
 
 1. **Points section (top, ~2/3 height)**
    - Face kicker, title, intro text
    - Bullet list
-   - **ACTOR** placeholder card (200×200) in the top-right corner
+   - **ACTOR** placeholder card (~150px) in the top-right corner
 2. **Media section (bottom, ~1/3 height)**
    - Exactly **two** reference images with captions
 
@@ -78,13 +76,9 @@ Templates:
 
 ### Right pane (`pane-cube`)
 
-1. **Datacube stage**
-   - CSS 3D cube
-   - Drag to free-orbit
-   - Click a cube face to lock that side
-2. **Features panel**
-   - Six vertically stacked feature buttons
-   - Selecting a button locks orientation and swaps left content
+1. **VBCF logo** in a fixed-height white brand box
+2. **Cube stage** centered between logo and Features
+3. **Features panel** bottom-aligned with six vertical buttons
 
 ## Interaction model
 
@@ -92,10 +86,13 @@ Templates:
 | --- | --- |
 | Page load | Auto-spin + overview content |
 | Click feature button / cube face | Lock face + load matching template |
+| After 15s face hold | Auto-spin resumes; **button + left content stay** |
 | Drag cube | Free inspect mode |
-| Click empty background | Resume auto-spin + overview |
+| **`Space` / empty click / `N` / `PageDown`** | **Presentation: next feature** |
+| **`Shift+Space` / `B` / `PageUp`** | **Presentation: previous feature** |
+| `Home` / `End` | First / last feature |
+| `Escape` | Overview + auto-spin |
 | Keyboard orbit (`WASD` / arrows, `Q`/`E`) | Free inspect nudges |
-| `Space` | Toggle auto-spin |
 | `R` | Reset inspect pose |
 
 ## Responsive verification
@@ -106,13 +103,13 @@ Structural checks passed for the current `cube.html`.
 
 | Viewport | Layout behavior |
 | --- | --- |
-| **> 1100px** | Two columns: flexible content + datacube `220–280px` |
-| **≤ 1100px** | Datacube column tightens to `200–240px` |
-| **≤ 960px** | Stacked layout: Datacube first, Content below |
+| **> 1100px** | Two columns: flexible content + cube `220–280px` |
+| **≤ 1100px** | Cube column tightens to `200–240px` |
+| **≤ 960px** | Stacked layout: cube first, content below; panes `height: auto` |
 | **≤ 720px** | Actor card stops floating top-right and stacks in flow |
-| **≤ 640px** | Smaller cube size and compact feature buttons (still vertical) |
-| **≤ 420px** | Further compact feature button type size |
-| **Desktop short height** (`≥961px` and `max-height: 820px`) | Reduced stage min-height to avoid overflow |
+| **≤ 640px** | Smaller cube/logo/actor; single-column media gallery |
+| **≤ 420px** | Further compact logo box and padding |
+| **Desktop short height** (`≥961px` + `max-height: 820px` / `700px`) | Compact logo, cube, and feature buttons |
 | **`prefers-reduced-motion`** | Non-essential transitions/animations disabled |
 | **`hover: none`** | Cube-face hover lift disabled on touch devices |
 
@@ -122,7 +119,8 @@ Structural checks passed for the current `cube.html`.
 - Long bullet lists scroll inside the top section instead of pushing media away.
 - Media images fill the lower third rather than using a fixed aspect-only box.
 - Feature buttons remain one vertical column at all breakpoints.
-- On mobile, datacube appears above content for faster interaction.
+- On mobile, cube pane appears above content for faster interaction.
+- Auto-spin ease-in timer is cancelled on stop to avoid double rAF loops.
 
 ### Manual check checklist
 

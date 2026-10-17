@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Interactive 3D CSS cube with face-linked content, manual orbit controls, and auto-rotation." />
+  <meta name="description" content="VBCF Datacube presentation: interactive 3D cube with face-linked content and features." />
   <meta name="color-scheme" content="dark" />
-  <title>Interactive 3D Cube</title>
+  <title>VBCF Datacube Presentation</title>
   <style>
     :root {
       --bg-0: #020617;
@@ -18,8 +18,13 @@
       --panel-glow: rgba(56, 189, 248, 0.12);
       --cube-size: clamp(100px, 14vmin, 170px);
       --half: calc(var(--cube-size) / 2);
-      --actor-size: 150px;
-      --pane-pad: clamp(0.85rem, 2vw, 1.25rem);
+      --actor-size: clamp(112px, 11vw, 150px);
+      --pane-pad: clamp(0.75rem, 1.8vw, 1.25rem);
+      --pane-gap: clamp(0.55rem, 1.5vh, 0.85rem);
+      --brand-box-height: 8.1rem;
+      --brand-logo-max: 6.35rem;
+      --right-col-min: 220px;
+      --right-col-max: 280px;
       --radius: 16px;
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
       --font: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -251,11 +256,16 @@
       position: relative;
       z-index: 1;
       display: grid;
-      /* Wider content pane, narrower cube/controls section */
-      grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+      /* Wider content pane, narrower cube/features column */
+      grid-template-columns: minmax(0, 1fr) minmax(var(--right-col-min), var(--right-col-max));
       width: 100%;
       min-height: 100dvh;
       height: 100dvh;
+      padding:
+        env(safe-area-inset-top, 0px)
+        env(safe-area-inset-right, 0px)
+        env(safe-area-inset-bottom, 0px)
+        env(safe-area-inset-left, 0px);
     }
 
     .pane {
@@ -264,6 +274,7 @@
       flex-direction: column;
       min-width: 0;
       min-height: 0;
+      height: 100%;
       padding: var(--pane-pad);
       border-right: 1px solid rgba(148, 163, 184, 0.12);
     }
@@ -286,15 +297,18 @@
     }
 
     .pane-label.content-title {
-      max-width: min(48rem, 100%);
-      margin-bottom: 1rem;
+      flex: 0 0 auto;
+      max-width: min(52rem, 100%);
+      margin-bottom: 0.85rem;
       padding-right: 0.25rem;
-      font-size: clamp(0.8rem, 1.2vw, 1rem);
+      font-size: clamp(0.78rem, 1.15vw, 1rem);
       font-weight: 750;
       letter-spacing: 0.03em;
-      line-height: 1.4;
+      line-height: 1.35;
       text-transform: none;
       color: var(--text);
+      text-wrap: pretty;
+      hyphens: auto;
     }
 
     .pane-label.is-swapping {
@@ -705,31 +719,37 @@
     .pane-brand {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       flex: 0 0 auto;
       width: 100%;
-      margin: 0 0 0.55rem;
-      padding: 0.45rem 0.65rem;
+      /* Fixed outer box size; logo scales inside */
+      height: var(--brand-box-height);
+      margin: 0;
+      /* Extra padding keeps white space between mark and box border */
+      padding: 0.55rem 0.7rem 0.95rem;
+      box-sizing: border-box;
       border-radius: 12px;
       border: 1px solid rgba(148, 163, 184, 0.16);
       background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
     }
 
     .pane-brand .brand-logo {
       display: block;
-      width: min(100%, 210px);
+      width: 100%;
       height: auto;
-      max-height: 58px;
+      max-height: var(--brand-logo-max);
       object-fit: contain;
-      object-position: center;
+      object-position: center top;
     }
 
     .pane-cube .pane-body {
       align-items: stretch;
       justify-content: flex-start;
-      gap: clamp(0.55rem, 1.5vh, 0.85rem);
+      gap: var(--pane-gap);
+      min-height: 0;
     }
 
     .stage-wrap {
@@ -737,15 +757,29 @@
       display: grid;
       place-items: center;
       width: 100%;
-      flex: 0 1 auto;
-      min-height: clamp(140px, 18vh, 220px);
-      max-height: clamp(180px, 26vh, 260px);
+      /* Fill the band between logo and Features; cube stays visually centered */
+      flex: 1 1 auto;
+      min-height: clamp(120px, 16vh, 200px);
+      max-height: none;
       aspect-ratio: auto;
       cursor: grab;
       touch-action: none;
       border-radius: 16px;
       border: 1px solid rgba(148, 163, 184, 0.1);
       background: rgba(2, 6, 23, 0.2);
+      overflow: hidden;
+    }
+
+    /* Features stay at the bottom of the right pane */
+    .pane-cube .faces-panel {
+      margin-top: 0;
+      flex: 0 1 auto;
+      min-height: 0;
+      max-height: min(52dvh, 100%);
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
     }
 
     .stage-wrap.is-dragging {
@@ -1023,48 +1057,13 @@
     }
 
     .faces-panel h2 {
-      margin: 0 0 0.35rem;
+      margin: 0 0 0.45rem;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
       text-align: center;
-    }
-
-    .faces-panel h2.faces-subheading {
-      margin-top: 0.85rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid rgba(148, 163, 184, 0.14);
-    }
-
-    .faces-hint {
-      margin: 0 0 0.75rem;
-      min-height: 1.4em;
-      font-size: clamp(0.7rem, 2.2vw, 0.76rem);
-      color: rgba(147, 164, 195, 0.85);
-      text-align: center;
-      line-height: 1.45;
-      opacity: 1;
-      transition:
-        opacity var(--dur-ui) var(--ease-soft),
-        color var(--dur-ui) var(--ease-soft);
-    }
-
-    .faces-hint.is-updating {
-      opacity: 0;
-    }
-
-    body.is-auto-spinning .faces-hint {
-      color: rgba(125, 211, 252, 0.9);
-    }
-
-    body.is-focused .faces-hint {
-      color: rgba(186, 230, 253, 0.88);
-    }
-
-    body.is-inspecting .faces-hint {
-      color: rgba(253, 230, 138, 0.95);
     }
 
     body.is-auto-spinning .faces-panel {
@@ -1083,127 +1082,14 @@
         0 0 28px rgba(15, 23, 42, 0.35);
     }
 
-    .controls-grid {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: var(--control-gap) 0.85rem;
-      align-items: center;
-    }
-
-    .orbit-controls {
-      display: grid;
-      grid-template-columns: repeat(3, var(--touch-min));
-      grid-template-rows: repeat(3, var(--touch-min));
-      gap: 0.4rem;
-      place-content: center;
-      justify-self: center;
-    }
-
-    .orbit-btn,
-    .orbit-action,
     .face-btn {
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
 
-    .orbit-btn {
-      appearance: none;
-      min-width: var(--touch-min);
-      min-height: var(--touch-min);
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      border-radius: 11px;
-      background: rgba(15, 23, 42, 0.72);
-      color: #e2e8f0;
-      font-size: 0.9rem;
-      font-weight: 700;
-      line-height: 1;
-      cursor: pointer;
-      transition:
-        background var(--dur-fast) var(--ease-soft),
-        border-color var(--dur-fast) var(--ease-soft),
-        transform var(--dur-fast) var(--ease-out),
-        box-shadow var(--dur-fast) var(--ease-soft);
-    }
-
-    .orbit-btn:hover {
-      background: rgba(51, 65, 85, 0.9);
-      border-color: rgba(125, 211, 252, 0.45);
-    }
-
-    .orbit-btn:focus-visible,
-    .orbit-action:focus-visible,
     .face-btn:focus-visible {
       outline: 2px solid rgba(125, 211, 252, 0.85);
       outline-offset: 2px;
-    }
-
-    .orbit-btn:active {
-      transform: scale(0.96);
-    }
-
-    .orbit-btn[data-orbit="up"] { grid-column: 2; grid-row: 1; }
-    .orbit-btn[data-orbit="left"] { grid-column: 1; grid-row: 2; }
-    .orbit-btn[data-orbit="right"] { grid-column: 3; grid-row: 2; }
-    .orbit-btn[data-orbit="down"] { grid-column: 2; grid-row: 3; }
-
-    .orbit-side {
-      display: grid;
-      gap: 0.55rem;
-      min-width: 0;
-    }
-
-    .orbit-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.35rem 0.65rem;
-      padding: 0.45rem 0.55rem;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.14);
-      background: rgba(2, 6, 23, 0.35);
-      font-size: 0.68rem;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .orbit-meta output {
-      color: #cbd5e1;
-      font-family: ui-monospace, monospace;
-      font-size: 0.7rem;
-      letter-spacing: 0.01em;
-    }
-
-    .orbit-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.45rem;
-    }
-
-    .orbit-action {
-      appearance: none;
-      min-height: var(--touch-min);
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      border-radius: 10px;
-      padding: 0.55rem 0.45rem;
-      background: rgba(30, 41, 59, 0.85);
-      color: #e2e8f0;
-      font-size: 0.74rem;
-      font-weight: 650;
-      cursor: pointer;
-      transition:
-        background var(--dur-fast) var(--ease-soft),
-        border-color var(--dur-fast) var(--ease-soft),
-        transform var(--dur-fast) var(--ease-out);
-    }
-
-    .orbit-action:hover {
-      border-color: rgba(125, 211, 252, 0.4);
-      background: rgba(51, 65, 85, 0.95);
-    }
-
-    .orbit-action:active {
-      transform: scale(0.98);
     }
 
     .face-buttons {
@@ -1292,17 +1178,10 @@
     .face-btn[data-face="top"]    { --btn-active-from: #b8e06a; --btn-active-to: #7aa328; }
     .face-btn[data-face="bottom"] { --btn-active-from: #b8e06a; --btn-active-to: #7aa328; }
 
-    .desktop-only-hint {
-      display: block;
-      margin-top: 0.65rem;
-      font-size: 0.68rem;
-      color: rgba(148, 163, 184, 0.75);
-      text-align: center;
-    }
-
     @media (max-width: 1100px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr) minmax(200px, 240px);
+      :root {
+        --right-col-min: 200px;
+        --right-col-max: 240px;
       }
     }
 
@@ -1313,12 +1192,13 @@
 
       .layout {
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(48dvh, auto) auto;
+        grid-template-rows: auto auto;
         height: auto;
         min-height: 100dvh;
       }
 
       .pane {
+        height: auto;
         border-right: none;
         border-bottom: 1px solid rgba(148, 163, 184, 0.12);
       }
@@ -1358,21 +1238,31 @@
 
       .pane-cube .pane-body {
         gap: 0.7rem;
+        /* Keep cube band usable above features on stacked layout */
+        min-height: clamp(320px, 52dvh, 560px);
+      }
+
+      .pane-brand {
+        height: var(--brand-box-height);
+        padding: 0.55rem 0.7rem 0.95rem;
       }
 
       .pane-brand .brand-logo {
-        width: min(100%, 240px);
-        max-height: 64px;
+        width: 100%;
+        max-height: var(--brand-logo-max);
       }
 
       .stage-wrap {
+        flex: 1 1 auto;
         min-height: clamp(180px, 28dvh, 280px);
-        max-height: clamp(220px, 34dvh, 320px);
+        max-height: none;
       }
 
-      .faces-panel {
+      .pane-cube .faces-panel {
         width: 100%;
         max-width: none;
+        max-height: none;
+        overflow: visible;
         padding: 0.75rem;
       }
 
@@ -1384,20 +1274,14 @@
         font-size: clamp(0.75rem, 2.4vw, 0.9rem);
         padding: 0.7rem 0.75rem;
       }
-
-      .controls-grid {
-        grid-template-columns: auto minmax(0, 1fr);
-        align-items: stretch;
-      }
-
-      .desktop-only-hint {
-        display: none;
-      }
     }
 
     @media (max-width: 640px) {
       :root {
         --cube-size: clamp(120px, 34vw, 170px);
+        --brand-box-height: 6.5rem;
+        --brand-logo-max: 5.8rem;
+        --actor-size: clamp(104px, 28vw, 140px);
         --touch-min: 2.4rem;
       }
 
@@ -1418,9 +1302,24 @@
         font-size: 0.8rem;
         letter-spacing: 0.03em;
       }
+
+      .content-gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .pane-content .face-template {
+        min-height: 480px;
+        height: auto;
+      }
     }
 
     @media (max-width: 420px) {
+      :root {
+        --brand-box-height: 5.85rem;
+        --brand-logo-max: 5.1rem;
+        --pane-pad: 0.7rem;
+      }
+
       .face-buttons {
         grid-template-columns: 1fr;
       }
@@ -1430,29 +1329,57 @@
       }
     }
 
+    /* Short desktop / laptop screens: keep logo + cube + features usable */
     @media (min-width: 961px) and (max-height: 820px) {
+      :root {
+        --brand-box-height: 6.35rem;
+        --brand-logo-max: 4.85rem;
+        --cube-size: clamp(90px, 12vmin, 140px);
+        --pane-gap: 0.45rem;
+        --pane-pad: clamp(0.55rem, 1.2vw, 0.9rem);
+      }
+
       .pane-brand {
-        margin-bottom: 0.4rem;
-        padding: 0.35rem 0.55rem;
+        height: var(--brand-box-height);
+        padding: 0.45rem 0.55rem 0.75rem;
       }
 
       .pane-brand .brand-logo {
-        max-height: 48px;
-        width: min(100%, 180px);
+        max-height: var(--brand-logo-max);
+        width: 100%;
       }
 
       .stage-wrap {
-        min-height: 130px;
-        max-height: 190px;
+        min-height: 100px;
+        max-height: none;
       }
 
-      .faces-panel {
-        padding: 0.65rem;
+      .pane-cube .faces-panel {
+        max-height: min(58dvh, 100%);
+        padding: 0.5rem;
       }
 
-      .faces-panel h2.faces-subheading {
-        margin-top: 0.65rem;
-        padding-top: 0.55rem;
+      .face-buttons {
+        gap: 0.3rem;
+      }
+
+      .face-btn {
+        min-height: calc(var(--touch-min) + 0.1rem);
+        padding: 0.45rem 0.4rem;
+        font-size: 0.68rem;
+      }
+    }
+
+    @media (min-width: 961px) and (max-height: 700px) {
+      :root {
+        --brand-box-height: 5.5rem;
+        --brand-logo-max: 4.1rem;
+        --cube-size: clamp(80px, 11vmin, 120px);
+        --actor-size: clamp(96px, 9vw, 120px);
+      }
+
+      .pane-cube .faces-panel {
+        max-height: min(62dvh, 100%);
       }
     }
 
@@ -1833,8 +1760,8 @@
           class="brand-logo"
           src="assets/branding/vbcf-logo.png"
           alt="Vienna BioCenter Core Facilities"
-          width="210"
-          height="58"
+          width="260"
+          height="106"
         />
       </div>
       <div class="pane-body">
@@ -1898,6 +1825,9 @@
       bottom: 'Service Management',
     };
 
+    // Presentation order matches the Features button stack
+    const FACE_ORDER = buttons.map((btn) => btn.dataset.face).filter(Boolean);
+
     const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
     const AUTO_TILT_X = -18;
     const LOCK_MS = 850; // keep in sync with --dur-lock
@@ -1923,6 +1853,7 @@
     let autoSpin = true;
     let inspecting = false;
     let autoSpinId = null;
+    let spinEaseTimer = null;
     let rotateTimer = null;
     let contentTimer = null;
     let faceHoldTimer = null;
@@ -2092,6 +2023,11 @@
     function stopAutoSpin() {
       autoSpin = false;
 
+      if (spinEaseTimer) {
+        window.clearTimeout(spinEaseTimer);
+        spinEaseTimer = null;
+      }
+
       if (autoSpinId) {
         cancelAnimationFrame(autoSpinId);
         autoSpinId = null;
@@ -2121,26 +2057,40 @@
     }
 
     function startAutoSpin({ preserveButtonSelection = false } = {}) {
-      if (autoSpinId) return;
+      // Already spinning or ease-in already scheduled
+      if (autoSpin && (autoSpinId || spinEaseTimer)) return;
 
       clearFaceHoldTimer();
+      if (spinEaseTimer) {
+        window.clearTimeout(spinEaseTimer);
+        spinEaseTimer = null;
+      }
+      if (autoSpinId) {
+        cancelAnimationFrame(autoSpinId);
+        autoSpinId = null;
+      }
+
       const highlightedFace = preserveButtonSelection ? selectedFace : null;
 
       autoSpin = true;
       inspecting = false;
       selectedFace = null;
-      if (preserveButtonSelection && highlightedFace) {
-        setButtonSelection(highlightedFace);
-      } else {
-        clearSelection();
-      }
       stage.classList.remove('is-rotating');
       cube.classList.remove('is-locking');
 
       // Fade background back to motion first, then resume spin
       body.classList.remove('is-focused', 'is-inspecting');
       body.classList.add('is-auto-spinning');
-      showContentTemplate('overview');
+
+      if (preserveButtonSelection && highlightedFace) {
+        // Timed resume: keep feature highlight and left-pane content
+        setButtonSelection(highlightedFace);
+        showContentTemplate(highlightedFace);
+      } else {
+        // Explicit background/reset resume: clear selection + overview
+        clearSelection();
+        showContentTemplate('overview');
+      }
 
       // Brief ease from locked pose into auto-spin trajectory
       cube.classList.remove('is-auto-spinning');
@@ -2153,7 +2103,8 @@
         `rotateX(${easeIn.x}deg) rotateY(${easeIn.y}deg) rotateZ(${easeIn.z}deg)`;
       current = easeIn;
 
-      window.setTimeout(() => {
+      spinEaseTimer = window.setTimeout(() => {
+        spinEaseTimer = null;
         if (!autoSpin) return;
         cube.classList.add('is-auto-spinning');
         cube.style.transition = 'none';
@@ -2175,6 +2126,31 @@
 
         autoSpinId = requestAnimationFrame(tick);
       }, 180);
+    }
+
+    function getPresentationFace() {
+      if (selectedFace && FACE_ORDER.includes(selectedFace)) return selectedFace;
+
+      const activeBtn = buttons.find((btn) => btn.classList.contains('active'));
+      if (activeBtn?.dataset.face && FACE_ORDER.includes(activeBtn.dataset.face)) {
+        return activeBtn.dataset.face;
+      }
+
+      if (FACE_ORDER.includes(activeTemplate)) return activeTemplate;
+      return null;
+    }
+
+    /** Presentation mode: step through Features in order (Space / click). */
+    function advanceFeature(step = 1) {
+      if (!FACE_ORDER.length) return;
+
+      const currentFace = getPresentationFace();
+      const idx = currentFace ? FACE_ORDER.indexOf(currentFace) : -1;
+      const nextIdx = idx < 0
+        ? (step >= 0 ? 0 : FACE_ORDER.length - 1)
+        : (idx + step + FACE_ORDER.length * 8) % FACE_ORDER.length;
+
+      showFace(FACE_ORDER[nextIdx]);
     }
 
     function showFace(face, { animate = true } = {}) {
@@ -2209,6 +2185,7 @@
     function isInteractiveTarget(target) {
       return Boolean(
         target.closest('.faces-panel') ||
+        target.closest('.pane-brand') ||
         target.closest('.face') ||
         target.closest('.face-btn') ||
         target.closest('.pane-content') ||
@@ -2340,14 +2317,29 @@
         case 'E':
           nudgeOrbit({ dz: KEY_STEP });
           break;
-        case ' ': // space toggles auto-spin
+        case ' ': // presentation: next feature (Shift+Space = previous)
           e.preventDefault();
-          if (autoSpin) {
-            stopAutoSpin();
-            enterInspectMode({ clearFace: true });
-          } else {
-            startAutoSpin();
-          }
+          advanceFeature(e.shiftKey ? -1 : 1);
+          break;
+        case 'n':
+        case 'N':
+        case 'PageDown':
+          advanceFeature(1);
+          break;
+        case 'b':
+        case 'B':
+        case 'PageUp':
+          advanceFeature(-1);
+          break;
+        case 'Home':
+          showFace(FACE_ORDER[0]);
+          break;
+        case 'End':
+          showFace(FACE_ORDER[FACE_ORDER.length - 1]);
+          break;
+        case 'Escape':
+          // Exit locked feature → overview + auto-spin
+          startAutoSpin();
           break;
         case 'r':
         case 'R':
@@ -2364,11 +2356,10 @@
 
     panel.addEventListener('click', (e) => e.stopPropagation());
 
-    // Clicking the background resumes auto-rotation
+    // Empty-area click = presentation next (like a slide clicker)
     body.addEventListener('click', (e) => {
       if (isInteractiveTarget(e.target)) return;
-      if (autoSpin) return;
-      startAutoSpin();
+      advanceFeature(1);
     });
 
     // Start spinning by default with overview content
