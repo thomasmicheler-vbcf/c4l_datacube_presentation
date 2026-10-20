@@ -65,7 +65,7 @@ Each template includes:
 1. **Points section (top, ~2/3 height)**
    - Face kicker, title, intro text
    - Bullet list
-   - **ACTOR** placeholder card (~150px) in the top-right corner
+   - **ACTOR** card(s) in an `.actors-stack` (~150px) in the top-right corner (add more `<figure class="actor-card">` blocks as needed)
 2. **Media section (bottom, ~1/3 height)**
    - Exactly **two** reference images with captions
 
@@ -157,7 +157,7 @@ Internet Explorer is not supported.
 | Area | Where to edit |
 | --- | --- |
 | Face copy / bullets / images | Face templates in `cube.html` (`data-face="..."`) |
-| Actor image | `.actor-card img` in each points section (or shared asset later) |
+| Actor image(s) | `.actors-stack` / `.actor-card` in each points section (duplicate a card for a second actor) |
 | Cube size | `:root --cube-size` |
 | Column widths | `.layout { grid-template-columns: ... }` |
 | Points/media ratio | `.face-template { grid-template-rows: 2fr 1fr; }` |
