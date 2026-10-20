@@ -510,12 +510,13 @@
     }
 
     .content-section.is-points .points-main {
+      --points-actor-pad: calc(var(--actor-size) + 1.25rem);
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
       min-width: 0;
       /* Reserve space for one actor card by default */
-      padding-right: calc(var(--actor-size) + 1.25rem);
+      padding-right: var(--points-actor-pad);
     }
 
     /* Extra space between face label (e.g. Overview) and section title */
@@ -608,11 +609,18 @@
     }
 
     .content-section.is-points:has(.actors-stack .actor-card:nth-child(2)) .points-main {
-      padding-right: calc((var(--actor-size) * 2) + var(--actors-gap, 0.55rem) + 1.35rem);
+      --points-actor-pad: calc((var(--actor-size) * 2) + var(--actors-gap, 0.55rem) + 1.35rem);
+      padding-right: var(--points-actor-pad);
     }
 
     .content-section.is-points:has(.actors-stack .actor-card:nth-child(3)) .points-main {
-      padding-right: calc((var(--actor-size) * 3) + (var(--actors-gap, 0.55rem) * 2) + 1.35rem);
+      --points-actor-pad: calc((var(--actor-size) * 3) + (var(--actors-gap, 0.55rem) * 2) + 1.35rem);
+      padding-right: var(--points-actor-pad);
+    }
+
+    .content-section.is-points:has(.actors-stack .actor-card:nth-child(4)) .points-main {
+      --points-actor-pad: calc((var(--actor-size) * 4) + (var(--actors-gap, 0.55rem) * 3) + 1.35rem);
+      padding-right: var(--points-actor-pad);
     }
 
     @media (max-width: 720px) {
@@ -730,21 +738,86 @@
       max-width: 62ch;
     }
 
+    /* Space between short description under the title and the bullet list */
+    .content-section.is-points .points-main > p + .content-list {
+      margin-top: 1.35rem;
+    }
+
+    .content-section.is-points .points-main > p + .content-list-columns {
+      /* Extra drop below the intro copy for two-column topic lists */
+      margin-top: 2.35rem;
+    }
+
+    /*
+      Side-by-side topic lists (Inventory).
+      Match Tools in Action gallery: 2 equal columns + same gap, full content width
+      so column 2 lines up with the second screenshot.
+    */
+    .content-list-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* Same horizontal rhythm as .content-gallery */
+      column-gap: 0.75rem;
+      row-gap: 1.25rem;
+      align-items: start;
+      box-sizing: border-box;
+      /* Cancel actor-reserved padding so width matches the media gallery */
+      width: calc(100% + var(--points-actor-pad, 0px));
+      max-width: none;
+      margin-right: calc(-1 * var(--points-actor-pad, 0px));
+      min-width: 0;
+    }
+
+    .content-list-columns > .content-list {
+      margin: 0;
+      min-width: 0;
+    }
+
+    @media (max-width: 720px) {
+      .content-list-columns {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+        row-gap: 1rem;
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+
     .content-list {
       display: grid;
-      gap: 0.75rem;
-      padding-left: 1.2rem;
+      gap: 0.85rem;
+      padding-left: 1.35rem;
       color: rgba(226, 232, 240, 0.95);
-      font-size: 1rem;
-      line-height: 1.5;
+      font-size: clamp(1.08rem, 1.55vw, 1.22rem);
+      line-height: 1.55;
     }
 
     .content-list li {
-      padding-left: 0.2rem;
+      padding-left: 0.25rem;
     }
 
     .content-list li::marker {
       color: var(--face-accent, #7dd3fc);
+    }
+
+    /* Nested bullets under a top-level list item */
+    .content-list .content-sublist {
+      display: grid;
+      gap: 0.4rem;
+      margin: 0.45rem 0 0.1rem;
+      padding-left: 1.15rem;
+      list-style-type: disc;
+      font-size: 0.8em;
+      line-height: 1.4;
+      color: rgba(226, 232, 240, 0.9);
+    }
+
+    .content-list .content-sublist li {
+      padding-left: 0.15rem;
+    }
+
+    .content-list .content-sublist li::marker {
+      color: color-mix(in srgb, var(--face-accent, #7dd3fc) 70%, white);
     }
 
     .content-gallery {
@@ -1567,7 +1640,11 @@
             <h3>The Core Facility Integration Backbone </h3>
             <p>A central bridge that connects institutional systems with all core facility software.</p>
             <ul class="content-list">
-              <li>...</li>
+              <li>Instrument Booking</li>
+              <li>Service Portal</li>
+              <li>eCommerce Platform</li>
+              <li>Sample & Inventory Management</li>
+              <li>Custom Solutions</li>
             </ul>
           
             </div>
@@ -1604,6 +1681,15 @@
             <div class="actors-stack" aria-label="Actors">
               <figure class="actor-card">
                 <img
+                  src="assets/actors/actor-back.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF Head</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
                   src="assets/actors/actor-front.svg"
                   width="150"
                   height="150"
@@ -1626,7 +1712,10 @@
             <h3>Centralized Core Facility Billing</h3>
             <p>A streamlined tool that converts facility activity and consumable orders into invoices.</p>
             <ul class="content-list">
-              <li>...</li>
+              <li>Transformation CF Utilisation to Invoicing</li>
+              <li>Integration of the VBCF Pricing Policy</li>
+              <li>Guided Invoice Creation</li>
+              <li>Internal Quality Control Process</li>
             </ul>
           
             </div>
@@ -1685,7 +1774,11 @@
             <h3>Aligning Resource Allocation with Research Demand</h3>
             <p>Explore facility data in real time and extract actionable insights</p>
             <ul class="content-list">
-              <li>...</li>
+              <li>Core Facility Utilization</li>
+              <li>Consolidated Reporting</li>
+              <li>Connected Financial Reporting</li>
+              <li>Research Demand Map</li>
+              <li>Investment & Planning Decisions</li>
             </ul>
           
             </div>
@@ -1754,9 +1847,28 @@
             <span class="content-kicker">Inventory</span>
             <h3>Inventory Framework: Instruments & Consumables</h3>
             <p>A unified inventory layer that combines enterprise asset management and laboratory consumable tracking.</p>
-            <ul class="content-list">
-              <li>...</li>
-            </ul>
+            <div class="content-list-columns" aria-label="Inventory topic lists">
+              <ul class="content-list">
+                <li>
+                  Consumables Tracking
+                  <ul class="content-sublist">
+                    <li>SISY-CE: Sample Information SYstem - Community Edition</li>
+                    <li>Stock level thresholds</li>
+                    <li>Lot / batch tracking</li>
+                    <li>Custom consumable types</li>
+                  </ul>
+                </li>
+              </ul>
+              <ul class="content-list">
+                <li>
+                  Asset Management
+                  <ul class="content-sublist">
+                    <li>User/Group assignment</li>
+                    <li>Warranty dates &amp; documentation</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
           
             </div>
           </article>
@@ -1765,21 +1877,21 @@
             <div class="content-gallery">
               <figure>
                 <img
-                  src="assets/co_image01.png"
-                  width="960"
-                  height="640"
-                  alt="Inventory Management (DataCube)"
-                />
-                <figcaption>Inventory Management (DataCube)</figcaption>
-              </figure>
-              <figure>
-                <img
                   src="assets/co_image02.png"
                   width="960"
                   height="640"
                   alt="Consumables Tracking (SISY-CE)"
                 />
                 <figcaption>Consumables Tracking (SISY-CE)</figcaption>
+              </figure>
+              <figure>
+                <img
+                  src="assets/co_image01.png"
+                  width="960"
+                  height="640"
+                  alt="Inventory Management (DataCube)"
+                />
+                <figcaption>Inventory Management (DataCube)</figcaption>
               </figure>
             </div>
           </article>
@@ -1833,7 +1945,10 @@
             <h3>The Unified Customer & Access Hub</h3>
             <p>A unified platform providing a single source of truth for customer identities, user accounts, and role-based access permissions across all core facility applications and touchpoints.</p>
             <ul class="content-list">
-              <li>...</li>
+              <li>Centralized Customer Management</li>
+              <li>Administration of User & Groups</li>
+              <li>Permissions for CF Applications</li>
+              <li>Integration of External Identity Management</li>
             </ul>
           
             </div>
@@ -1881,7 +1996,9 @@
             <h3>Service Catalogue & Pricing</h3>
             <p>A centralized administration platform designed to define and control facility services.</p>
             <ul class="content-list">
-              <li>...</li>
+              <li>Centralized Service Catalog<br> establishes a consistent, standardized structure across every specialized core facility</li>
+              <li>Service Types</li>
+              <li>Service Lifecycle</li>
             </ul>
           
             </div>
