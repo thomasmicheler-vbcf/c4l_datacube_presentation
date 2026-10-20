@@ -2,7 +2,7 @@
 
 Replace these placeholder files with final portrait assets.
 
-Keep the filenames so `cube.html` does not need edits:
+Keep the filenames so `index.html` does not need edits:
 
 | File | Used by |
 | --- | --- |
@@ -15,4 +15,4 @@ Keep the filenames so `cube.html` does not need edits:
 | `actor-bottom.svg` | Bottom feature |
 
 Recommended final format: square image, at least 400×400 (PNG or JPG is fine).
-If you change extensions, update the matching `<img src="...">` paths in `cube.html`.
+If you change extensions, update the matching `<img src="...">` paths in `index.html`.

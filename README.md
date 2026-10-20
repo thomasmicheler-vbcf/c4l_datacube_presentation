@@ -9,7 +9,7 @@ No build step or dependencies.
 
 | File | Purpose |
 | --- | --- |
-| `cube.html` | Complete app (markup, styles, and script) |
+| `index.html` | Complete app (markup, styles, and script) |
 | `README.md` | Setup, usage, and UI structure docs |
 
 ## Quick start
@@ -17,7 +17,7 @@ No build step or dependencies.
 ### Option A — open directly
 
 ```bash
-open cube.html
+open index.html
 ```
 
 ### Option B — local static server (recommended)
@@ -30,7 +30,7 @@ python3 -m http.server 8080
 Open:
 
 ```text
-http://localhost:8080/cube.html
+http://localhost:8080/
 ```
 
 ## Final UI structure
@@ -65,7 +65,7 @@ Each template includes:
 1. **Points section (top, ~2/3 height)**
    - Face kicker, title, intro text
    - Bullet list
-   - **ACTOR** placeholder card (~150px) in the top-right corner
+   - **ACTOR** card(s) in an `.actors-stack` (~150px) in the top-right corner (add more `<figure class="actor-card">` blocks as needed)
 2. **Media section (bottom, ~1/3 height)**
    - Exactly **two** reference images with captions
 
@@ -97,7 +97,7 @@ Templates:
 
 ## Responsive verification
 
-Structural checks passed for the current `cube.html`.
+Structural checks passed for the current `index.html`.
 
 ### Breakpoints
 
@@ -156,8 +156,8 @@ Internet Explorer is not supported.
 
 | Area | Where to edit |
 | --- | --- |
-| Face copy / bullets / images | Face templates in `cube.html` (`data-face="..."`) |
-| Actor image | `.actor-card img` in each points section (or shared asset later) |
+| Face copy / bullets / images | Face templates in `index.html` (`data-face="..."`) |
+| Actor image(s) | `.actors-stack` / `.actor-card` in each points section (duplicate a card for a second actor) |
 | Cube size | `:root --cube-size` |
 | Column widths | `.layout { grid-template-columns: ... }` |
 | Points/media ratio | `.face-template { grid-template-rows: 2fr 1fr; }` |

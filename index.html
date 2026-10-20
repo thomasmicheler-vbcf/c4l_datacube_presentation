@@ -338,7 +338,8 @@
       position: absolute;
       inset: 0;
       display: grid;
-      grid-template-rows: minmax(0, 2fr) minmax(140px, 1fr);
+      /* Points (~top) + Tools in Action (~bottom, +150px vs prior 140px floor) */
+      grid-template-rows: minmax(0, 2fr) minmax(290px, 1fr);
       gap: 0.85rem;
       width: 100%;
       height: 100%;
@@ -509,12 +510,13 @@
     }
 
     .content-section.is-points .points-main {
+      --points-actor-pad: calc(var(--actor-size) + 1.25rem);
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
       min-width: 0;
-      /* Reserve space for actor card (image + caption) */
-      padding-right: calc(var(--actor-size) + 1.25rem);
+      /* Reserve space for one actor card by default */
+      padding-right: var(--points-actor-pad);
     }
 
     /* Extra space between face label (e.g. Overview) and section title */
@@ -527,13 +529,41 @@
       margin-top: 0.75rem;
     }
 
-    .actor-card {
+    /*
+      Multi-actor row in the top-right of the points section.
+      Add more .actor-card children to show additional people side by side.
+    */
+    .actors-stack {
+      --actors-gap: 0.65rem;
       position: absolute;
       top: 1rem;
       right: 1rem;
       z-index: 2;
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      justify-content: flex-end;
+      gap: var(--actors-gap);
+      width: max-content;
+      max-width: calc(100% - 2rem);
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Single bare actor-card (no stack) stays top-right */
+    .content-section.is-points > .actor-card {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 2;
+    }
+
+    .actor-card {
+      position: relative;
+      display: flex;
       flex-direction: column;
+      flex: 0 0 auto;
       width: var(--actor-size);
       margin: 0;
       overflow: hidden;
@@ -543,6 +573,12 @@
         linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 35%),
         rgba(15, 23, 42, 0.72);
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .actors-stack .actor-card {
+      position: relative;
+      top: auto;
+      right: auto;
     }
 
     .actor-card img {
@@ -566,6 +602,27 @@
       background: rgba(2, 6, 23, 0.35);
     }
 
+    /* Two+ actors: slightly smaller cards + room for the full horizontal row */
+    .content-section.is-points:has(.actors-stack .actor-card:nth-child(2)) {
+      --actor-size: clamp(88px, 8.5vw, 120px);
+      --actors-gap: 0.55rem;
+    }
+
+    .content-section.is-points:has(.actors-stack .actor-card:nth-child(2)) .points-main {
+      --points-actor-pad: calc((var(--actor-size) * 2) + var(--actors-gap, 0.55rem) + 1.35rem);
+      padding-right: var(--points-actor-pad);
+    }
+
+    .content-section.is-points:has(.actors-stack .actor-card:nth-child(3)) .points-main {
+      --points-actor-pad: calc((var(--actor-size) * 3) + (var(--actors-gap, 0.55rem) * 2) + 1.35rem);
+      padding-right: var(--points-actor-pad);
+    }
+
+    .content-section.is-points:has(.actors-stack .actor-card:nth-child(4)) .points-main {
+      --points-actor-pad: calc((var(--actor-size) * 4) + (var(--actors-gap, 0.55rem) * 3) + 1.35rem);
+      padding-right: var(--points-actor-pad);
+    }
+
     @media (max-width: 720px) {
       .content-section.is-points {
         display: flex;
@@ -577,16 +634,25 @@
         padding-right: 0;
       }
 
-      .content-section.is-points .actor-card {
+      .content-section.is-points > .actor-card,
+      .content-section.is-points .actors-stack {
         order: 1;
       }
 
-      .actor-card {
+      .content-section.is-points > .actor-card,
+      .actors-stack {
         position: relative;
         top: auto;
         right: auto;
-        width: min(var(--actor-size), 100%);
+        width: 100%;
+        max-width: 100%;
         margin: 0 0 0.85rem 0;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .actor-card {
+        width: min(var(--actor-size), calc(50% - 0.35rem));
         align-self: flex-start;
       }
 
@@ -597,20 +663,44 @@
       }
     }
 
-    /* Bottom media block: ~1/3 of left pane */
+    /* Bottom media block (Tools in Action) */
     .content-section.is-media {
+      position: relative;
       grid-row: 2;
-      min-height: 0;
+      min-height: 290px;
       overflow: hidden;
+      /* Room for top-left title above the gallery */
+      padding-top: 2.35rem;
     }
 
     .content-section.is-media h3 {
-      flex: 0 0 auto;
+      position: absolute;
+      top: 0.75rem;
+      left: 1.1rem;
+      right: auto;
+      z-index: 2;
+      margin: 0;
+      max-width: calc(100% - 2.2rem);
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      /* Match supporting-detail body copy tone */
+      color: var(--muted);
+      font-size: clamp(0.95rem, 1.35vw, 1.1rem);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      line-height: 1.35;
+      text-align: left;
+      text-transform: none;
+      white-space: nowrap;
+      pointer-events: none;
     }
 
     .content-section.is-media .content-gallery {
       flex: 1 1 auto;
       min-height: 0;
+      height: 100%;
       align-content: stretch;
     }
 
@@ -648,21 +738,86 @@
       max-width: 62ch;
     }
 
+    /* Space between short description under the title and the bullet list */
+    .content-section.is-points .points-main > p + .content-list {
+      margin-top: 1.35rem;
+    }
+
+    .content-section.is-points .points-main > p + .content-list-columns {
+      /* Extra drop below the intro copy for two-column topic lists */
+      margin-top: 2.35rem;
+    }
+
+    /*
+      Side-by-side topic lists (Inventory).
+      Match Tools in Action gallery: 2 equal columns + same gap, full content width
+      so column 2 lines up with the second screenshot.
+    */
+    .content-list-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* Same horizontal rhythm as .content-gallery */
+      column-gap: 0.75rem;
+      row-gap: 1.25rem;
+      align-items: start;
+      box-sizing: border-box;
+      /* Cancel actor-reserved padding so width matches the media gallery */
+      width: calc(100% + var(--points-actor-pad, 0px));
+      max-width: none;
+      margin-right: calc(-1 * var(--points-actor-pad, 0px));
+      min-width: 0;
+    }
+
+    .content-list-columns > .content-list {
+      margin: 0;
+      min-width: 0;
+    }
+
+    @media (max-width: 720px) {
+      .content-list-columns {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+        row-gap: 1rem;
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+
     .content-list {
       display: grid;
-      gap: 0.75rem;
-      padding-left: 1.2rem;
+      gap: 0.85rem;
+      padding-left: 1.35rem;
       color: rgba(226, 232, 240, 0.95);
-      font-size: 1rem;
-      line-height: 1.5;
+      font-size: clamp(1.08rem, 1.55vw, 1.22rem);
+      line-height: 1.55;
     }
 
     .content-list li {
-      padding-left: 0.2rem;
+      padding-left: 0.25rem;
     }
 
     .content-list li::marker {
       color: var(--face-accent, #7dd3fc);
+    }
+
+    /* Nested bullets under a top-level list item */
+    .content-list .content-sublist {
+      display: grid;
+      gap: 0.4rem;
+      margin: 0.45rem 0 0.1rem;
+      padding-left: 1.15rem;
+      list-style-type: disc;
+      font-size: 0.8em;
+      line-height: 1.4;
+      color: rgba(226, 232, 240, 0.9);
+    }
+
+    .content-list .content-sublist li {
+      padding-left: 0.15rem;
+    }
+
+    .content-list .content-sublist li::marker {
+      color: color-mix(in srgb, var(--face-accent, #7dd3fc) 70%, white);
     }
 
     .content-gallery {
@@ -674,8 +829,8 @@
 
     .content-gallery figure {
       margin: 0;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
       min-height: 0;
       height: 100%;
       overflow: hidden;
@@ -684,23 +839,29 @@
       background: rgba(15, 23, 42, 0.55);
     }
 
+    /*
+      Scale image to the full frame width; keep top aligned.
+      Extra height is clipped at the bottom (sides stay fully visible).
+    */
     .content-gallery img {
       display: block;
+      box-sizing: border-box;
       width: 100%;
-      flex: 1 1 auto;
+      max-width: 100%;
+      height: 100%;
       min-height: 0;
-      height: auto;
-      aspect-ratio: auto;
+      min-width: 0;
       object-fit: cover;
+      object-position: top center;
       background:
         linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(168, 85, 247, 0.16));
     }
 
     .content-gallery figcaption {
-      flex: 0 0 auto;
       padding: 0.4rem 0.55rem 0.5rem;
       font-size: 0.74rem;
       color: var(--muted);
+      background: rgba(2, 6, 23, 0.45);
     }
 
     .face-template[data-face="front"]  { --face-accent: #6699cc; }
@@ -709,7 +870,6 @@
     .face-template[data-face="left"]   { --face-accent: #ffa100; }
     .face-template[data-face="top"]    { --face-accent: #99cc34; }
     .face-template[data-face="bottom"] { --face-accent: #99cc34; }
-    .face-template[data-face="overview"] { --face-accent: #7dd3fc; }
 
     .pane-cube {
       background:
@@ -1082,16 +1242,6 @@
         0 0 28px rgba(15, 23, 42, 0.35);
     }
 
-    .face-btn {
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-
-    .face-btn:focus-visible {
-      outline: 2px solid rgba(125, 211, 252, 0.85);
-      outline-offset: 2px;
-    }
-
     .face-buttons {
       display: grid;
       grid-template-columns: 1fr;
@@ -1102,6 +1252,8 @@
     .face-btn {
       --btn-from: #334155;
       --btn-to: #1e293b;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
       appearance: none;
       min-width: 0;
       min-height: calc(var(--touch-min) + 0.55rem);
@@ -1156,6 +1308,11 @@
 
     .face-btn:active {
       transform: translateY(1px) scale(0.98);
+    }
+
+    .face-btn:focus-visible {
+      outline: 2px solid rgba(125, 211, 252, 0.85);
+      outline-offset: 2px;
     }
 
     .face-btn.active {
@@ -1221,9 +1378,9 @@
       .pane-content .face-template {
         position: relative;
         inset: auto;
-        height: min(70dvh, 720px);
-        min-height: 420px;
-        grid-template-rows: minmax(0, 2fr) minmax(140px, 1fr);
+        height: min(70dvh, 870px);
+        min-height: 570px;
+        grid-template-rows: minmax(0, 2fr) minmax(290px, 1fr);
       }
 
       .pane-label.content-title {
@@ -1305,6 +1462,17 @@
 
       .content-gallery {
         grid-template-columns: 1fr;
+      }
+
+      .content-section.is-media {
+        padding-top: 2.1rem;
+      }
+
+      .content-section.is-media h3 {
+        left: 0.85rem;
+        right: auto;
+        font-size: 0.92rem;
+        white-space: normal;
       }
 
       .pane-content .face-template {
@@ -1440,312 +1608,423 @@
     <a class="skip-link" href="#facesPanel">Skip to cube controls</a>
 
     <section class="pane pane-content" aria-label="Content">
-      <div class="pane-label content-title" id="contentPaneLabel">VBCF's Datacube System - Bridging core facility utilisation, billing &amp; reporting</div>
+      <div class="pane-label content-title" id="contentPaneLabel">VBCF DataCube - Bridging core facility utilisation, billing &amp; reporting</div>
       <div class="pane-body" id="contentPaneBody" aria-live="polite" aria-atomic="true">
-
-        <!-- Default template while auto-rotating -->
-        <div class="face-template is-active" data-face="overview" id="template-overview">
-          <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-overview.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
-            <div class="points-main">
-            <span class="content-kicker">Overview</span>
-            <h3>Explore the cube topics</h3>
-            <p>Select a face on the right to load its dedicated content template here.</p>
-            <ul class="content-list">
-              <li>Each face has its own title, bullet list, and two images</li>
-              <li>Core Facility Applications introduces the product vision and core promise</li>
-              <li>Controlling covers challenges, risks, and reverse angles</li>
-              <li>Reporting focuses on growth, momentum, and next actions</li>
-              <li>Billing captures context, constraints, and supporting detail</li>
-              <li>User Management covers strategy, ambition, and long-range goals</li>
-              <li>Service Management grounds the story in foundations and operations</li>
-              <li>Click background space anytime to return to this overview</li>
-            </ul>
-          
-            </div>
-          </article>
-          <article class="content-section is-media">
-            <h3>Reference images</h3>
-            <div class="content-gallery">
-              <figure>
-                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=900&q=80" alt="Blue geometric structure" />
-                <figcaption>System overview</figcaption>
-              </figure>
-              <figure>
-                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=900&q=80" alt="Soft multicolor gradient" />
-                <figcaption>Topic palette</figcaption>
-              </figure>
-            </div>
-          </article>
-        </div>
 
         <!-- FRONT template -->
         <div class="face-template" data-face="front" id="template-front">
           <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-front.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
+            <!-- Example: two actors side by side for Core Facility Applications -->
+            <div class="actors-stack" aria-label="Actors">
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-front.svg"
+                  width="150"
+                  height="150"
+                  alt="Facility user portrait"
+                />
+                <figcaption>CF Team</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-overview.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>CF Users</figcaption>
+              </figure>
+            </div>
             <div class="points-main">
             <span class="content-kicker">Core Facility Applications</span>
-            <h3>Vision and first impression</h3>
-            <p>The entry face: what someone should understand in the first few seconds.</p>
+            <h3>The Core Facility Integration Backbone </h3>
+            <p>A central bridge that connects institutional systems with all core facility software.</p>
             <ul class="content-list">
-              <li>Lead with the clearest value statement</li>
-              <li>Show the primary user problem being solved</li>
-              <li>Keep the language short enough to scan while the cube is locked</li>
-              <li>Highlight the one action you want the viewer to take next</li>
-              <li>Use blue accents to signal trust and clarity</li>
-              <li>Pair the message with a clean, structural visual</li>
-              <li>Make this the default story when presenting live</li>
-              <li>Update this list with your product pitch bullets</li>
+              <li>Instrument Booking</li>
+              <li>Service Portal</li>
+              <li>eCommerce Platform</li>
+              <li>Sample & Inventory Management</li>
+              <li>Custom Solutions</li>
             </ul>
           
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Core Facility Applications visuals</h3>
+            <h3>Tools in Action</h3>
             <div class="content-gallery">
               <figure>
-                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=900&q=80" alt="Blue glass architecture" />
-                <figcaption>Clarity and structure</figcaption>
+                <img
+                  src="assets/cf_image01.png"
+                  width="960"
+                  height="640"
+                  alt="Stratocore PPMS (Booking)"
+                />
+                <figcaption>Stratocore PPMS (Booking)</figcaption>
               </figure>
               <figure>
-                <img src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=900&q=80" alt="Blue light beams" />
-                <figcaption>Signal and focus</figcaption>
+                <img
+                  src="assets/cf_image02.png"
+                  width="960"
+                  height="640"
+                  alt="Atlassian JIRA (Request Management)"
+                />
+                <figcaption>Atlassian JIRA (Request Management)</figcaption>
               </figure>
             </div>
           </article>
         </div>
 
-        <!-- BACK template -->
-        <div class="face-template" data-face="back" id="template-back">
-          <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-back.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
-            <div class="points-main">
-            <span class="content-kicker">Controlling</span>
-            <h3>Challenges and reverse view</h3>
-            <p>The opposite angle: friction, objections, and what sits behind the pitch.</p>
-            <ul class="content-list">
-              <li>Call out the main risks or blockers honestly</li>
-              <li>Explain what happens if the problem stays unsolved</li>
-              <li>List common objections and the short rebuttal for each</li>
-              <li>Show dependencies that are easy to overlook</li>
-              <li>Use red accents for urgency without sounding alarming</li>
-              <li>Keep one bullet for “what we will not do”</li>
-              <li>Add evidence or lessons learned from past attempts</li>
-              <li>End with the recovery path back to the front vision</li>
-            </ul>
-          
-            </div>
-          </article>
-          <article class="content-section is-media">
-            <h3>Controlling visuals</h3>
-            <div class="content-gallery">
-              <figure>
-                <img src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=900&q=80" alt="Deep red abstract gradient" />
-                <figcaption>Pressure and contrast</figcaption>
-              </figure>
-              <figure>
-                <img src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=900&q=80" alt="Dark purple and red waves" />
-                <figcaption>Hidden complexity</figcaption>
-              </figure>
-            </div>
-          </article>
-        </div>
 
-        <!-- RIGHT template -->
-        <div class="face-template" data-face="right" id="template-right">
-          <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-right.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
-            <div class="points-main">
-            <span class="content-kicker">Reporting</span>
-            <h3>Growth and momentum</h3>
-            <p>Forward motion: opportunities, expansion, and near-term wins.</p>
-            <ul class="content-list">
-              <li>List the next three growth bets in priority order</li>
-              <li>Define what “good” looks like in 30 / 60 / 90 days</li>
-              <li>Call out the audience or market segment to unlock first</li>
-              <li>Map the quickest path from demo to adoption</li>
-              <li>Use green accents to signal progress and health</li>
-              <li>Include one metric that proves momentum</li>
-              <li>Note partnerships or channels that amplify reach</li>
-              <li>Keep a bullet for the single biggest unlock this quarter</li>
-            </ul>
-          
-            </div>
-          </article>
-          <article class="content-section is-media">
-            <h3>Reporting visuals</h3>
-            <div class="content-gallery">
-              <figure>
-                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80" alt="Earth from space at night" />
-                <figcaption>Scale and reach</figcaption>
-              </figure>
-              <figure>
-                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80" alt="Analytics dashboard on laptop" />
-                <figcaption>Signals of growth</figcaption>
-              </figure>
-            </div>
-          </article>
-        </div>
-
-        <!-- LEFT template -->
+        <!-- BILLING template -->
         <div class="face-template" data-face="left" id="template-left">
           <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-left.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
+            <div class="actors-stack" aria-label="Actors">
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-back.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF Head</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-front.svg"
+                  width="150"
+                  height="150"
+                  alt="Facility user portrait"
+                />
+                <figcaption>VBCF Admin</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-overview.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>CF Users</figcaption>
+              </figure>
+            </div>
             <div class="points-main">
             <span class="content-kicker">Billing</span>
-            <h3>Context and constraints</h3>
-            <p>Supporting detail: environment, limits, and the frame around the decision.</p>
+            <h3>Centralized Core Facility Billing</h3>
+            <p>A streamlined tool that converts facility activity and consumable orders into invoices.</p>
             <ul class="content-list">
-              <li>Describe the current operating environment</li>
-              <li>List hard constraints (time, budget, compliance, tech)</li>
-              <li>Name the stakeholders who must stay aligned</li>
-              <li>Capture assumptions that still need validation</li>
-              <li>Use yellow accents for attention and caution</li>
-              <li>Include adjacent systems this topic depends on</li>
-              <li>Note what is explicitly out of scope</li>
-              <li>Keep a bullet for open questions to resolve next</li>
+              <li>Transform Core Facility Usage into Invoicing Data</li>
+              <li>Integration of the VBCF Pricing Policy</li>
+              <li>Guided Invoice Creation</li>
+              <li>Internal Quality Control Process</li>
             </ul>
           
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Billing visuals</h3>
+            <h3>Tools in Action</h3>
             <div class="content-gallery">
               <figure>
-                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80" alt="Team collaborating in office" />
-                <figcaption>People and process</figcaption>
-              </figure>
-              <figure>
-                <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=900&q=80" alt="Person working on laptop" />
-                <figcaption>Day-to-day context</figcaption>
+                <img
+                  src="assets/bi_image02.png"
+                  width="960"
+                  height="640"
+                  alt="Billing image 01"
+                />
+                <figcaption>ZOHO Invoice</figcaption>
               </figure>
             </div>
           </article>
         </div>
 
-        <!-- TOP template -->
+
+        <!-- REPORTING template -->
+        <div class="face-template" data-face="right" id="template-right">
+          <article class="content-section is-points">
+            <div class="actors-stack" aria-label="Actors">
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-overview.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF Management</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-front.svg"
+                  width="150"
+                  height="150"
+                  alt="Facility user portrait"
+                />
+                <figcaption>VBCF Controlling</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-back.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF Head</figcaption>
+              </figure>
+            </div>
+            <div class="points-main">
+            <span class="content-kicker">Reporting</span>
+            <h3>Aligning Resource Allocation with Research Demand</h3>
+            <p>Explore facility data in real time and extract actionable insights</p>
+            <ul class="content-list">
+              <li>Explore facility utilization</li>
+              <li>Consolidate reporting across specialized Core Facilities</li>
+              <li>Seemlessly integrate with financial reporting</li>
+              <li>Map demand and resource allocation</li>
+              <li>Accelerate Investment & Planning decisions</li>
+            </ul>
+          
+            </div>
+          </article>
+          <article class="content-section is-media">
+            <h3>Tools in Action</h3>
+            <div class="content-gallery">
+              <figure>
+                <img
+                  src="assets/re_image01.png"
+                  width="960"
+                  height="640"
+                  alt="Metabase Reports"
+                />
+                <figcaption>Metabase Reports</figcaption>
+              </figure>
+              <figure>
+                <img
+                  src="assets/re_image02.png"
+                  width="960"
+                  height="640"
+                  alt="Metabase Reports"
+                />
+                <figcaption>AI Report Agent</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+
+        <!-- INVENTORY template -->
+        <div class="face-template" data-face="back" id="template-back">
+          <article class="content-section is-points">
+            <div class="actors-stack" aria-label="Actors">
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-front.svg"
+                  width="150"
+                  height="150"
+                  alt="Facility user portrait"
+                />
+                <figcaption>VBCF Controlling</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-back.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF Head</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-left.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF Team</figcaption>
+              </figure>
+            </div>
+
+            
+            <div class="points-main">
+            <span class="content-kicker">Inventory</span>
+            <h3>Inventory Framework: Instruments & Consumables</h3>
+            <p>A unified inventory layer that combines enterprise asset management and laboratory consumable tracking.</p>
+            <div class="content-list-columns" aria-label="Inventory topic lists">
+              <ul class="content-list">
+                <li>
+                  Consumables Tracking
+                  <ul class="content-sublist">
+                    <li>SISY-CE: Sample Information SYstem - Community Edition</li>
+                    <li>Stock level thresholds</li>
+                    <li>Lot / batch tracking</li>
+                    <li>Custom consumable types</li>
+                  </ul>
+                </li>
+              </ul>
+              <ul class="content-list">
+                <li>
+                  Asset Management
+                  <ul class="content-sublist">
+                    <li>User/Group assignment</li>
+                    <li>Warranty dates &amp; documentation</li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          
+            </div>
+          </article>
+          <article class="content-section is-media">
+            <h3>Tools in Action</h3>
+            <div class="content-gallery">
+              <figure>
+                <img
+                  src="assets/co_image02.png"
+                  width="960"
+                  height="640"
+                  alt="Consumables Tracking (SISY-CE)"
+                />
+                <figcaption>Consumables Tracking (SISY-CE)</figcaption>
+              </figure>
+              <figure>
+                <img
+                  src="assets/co_image01.png"
+                  width="960"
+                  height="640"
+                  alt="Inventory Management (DataCube)"
+                />
+                <figcaption>Inventory Management (DataCube)</figcaption>
+              </figure>
+            </div>
+          </article>
+        </div>
+
+
+        <!-- User Management template -->
         <div class="face-template" data-face="top" id="template-top">
           <article class="content-section is-points">
-            <figure class="actor-card">
+            <div class="actors-stack" aria-label="Actors">
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-back.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF ADMIN</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-overview.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>CF Team</figcaption>
+              </figure>
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-front.svg"
+                  width="150"
+                  height="150"
+                  alt="Facility user portrait"
+                />
+                <figcaption>CF Users</figcaption>
+              </figure>
+              <figure class="actor-card">
               <img
                 src="assets/actors/actor-top.svg"
                 width="150"
                 height="150"
                 alt="Actor placeholder portrait"
               />
-              <figcaption>ACTOR</figcaption>
+              <figcaption>VBC Community</figcaption>
             </figure>
+            </div>
+          
             <div class="points-main">
             <span class="content-kicker">User Management</span>
-            <h3>Strategy and ambition</h3>
-            <p>The high-level view: direction, principles, and long-range intent.</p>
+            <h3>The Unified Customer & Access Hub</h3>
+            <p>A unified platform providing a single source of truth for customer identities, user accounts, and role-based access permissions across all core facility applications and touchpoints.</p>
             <ul class="content-list">
-              <li>State the north-star outcome in one sentence</li>
-              <li>List the guiding principles that shape decisions</li>
-              <li>Show how this face connects the other five topics</li>
-              <li>Define the 12-month ambition without diving into tasks</li>
-              <li>Use purple accents for elevation and imagination</li>
-              <li>Include strategic bets that require executive buy-in</li>
-              <li>Call out the non-negotiable quality bar</li>
-              <li>End with the story you want leaders to repeat</li>
+              <li>Centralized Customer Management</li>
+              <li>Administration of User & Groups</li>
+              <li>Permissions for CF Applications</li>
+              <li>Integration with existing Identity Management</li>
             </ul>
           
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>User Management visuals</h3>
+            <h3>Tools in Action</h3>
             <div class="content-gallery">
               <figure>
-                <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80" alt="Mountain landscape above the clouds" />
-                <figcaption>Horizon view</figcaption>
+                <img
+                  src="assets/um_image02.png"
+                  width="960"
+                  height="640"
+                  alt="VBC Login (DataCube, Keycloak)"
+                />
+                <figcaption>VBC Login (DataCube, Keycloak)</figcaption>
               </figure>
               <figure>
-                <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=900&q=80" alt="Night sky with stars" />
-                <figcaption>Long-range ambition</figcaption>
+                <img
+                  src="assets/um_image01.png"
+                  width="960"
+                  height="640"
+                  alt="Customer Management (DataCube)"
+                />
+                <figcaption>Customer Management (DataCube)</figcaption>
               </figure>
             </div>
           </article>
         </div>
 
-        <!-- BOTTOM template -->
+
+        <!-- SERVICE template -->
         <div class="face-template" data-face="bottom" id="template-bottom">
           <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-bottom.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
+            <div class="actors-stack" aria-label="Actors">
+              <figure class="actor-card">
+                <img
+                  src="assets/actors/actor-back.svg"
+                  width="150"
+                  height="150"
+                  alt="Core facility manager portrait"
+                />
+                <figcaption>VBCF ADMIN</figcaption>
+              </figure>
+            </div>
             <div class="points-main">
             <span class="content-kicker">Service Management</span>
-            <h3>Foundations and operations</h3>
-            <p>The base layer: delivery mechanics, reliability, and what keeps things running.</p>
+            <h3>Service Catalogue & Pricing</h3>
+            <p>A centralized administration platform designed to define and control facility services.</p>
             <ul class="content-list">
-              <li>List the core systems and owners behind the experience</li>
-              <li>Define the minimum operational checklist</li>
-              <li>Call out monitoring, support, and escalation paths</li>
-              <li>Document the release or rollout rhythm</li>
-              <li>Use orange accents for energy and practicality</li>
-              <li>Include cost, capacity, or reliability guardrails</li>
-              <li>Note the handoff points between teams</li>
-              <li>Keep one bullet for the next foundation improvement</li>
+              <li>Centralized Service Catalogue - establishes a consistent, standardized structure across every specialized core facility</li>
+              <li>Service Categorization</li>
+              <li>Service Lifecycle</li>
             </ul>
           
             </div>
           </article>
           <article class="content-section is-media">
-            <h3>Service Management visuals</h3>
+            <h3>Tools in Action</h3>
             <div class="content-gallery">
               <figure>
-                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80" alt="Circuit board close-up" />
-                <figcaption>Technical foundation</figcaption>
+                <img
+                  src="assets/sm_image01.png"
+                  width="960"
+                  height="640"
+                  alt="Service Management (DataCube)"
+                />
+                <figcaption>Service Management (DataCube)</figcaption>
               </figure>
               <figure>
-                <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80" alt="Engineer working with technology" />
-                <figcaption>Operations in practice</figcaption>
+                <img
+                  src="assets/sm_image02.png"
+                  width="960"
+                  height="640"
+                  alt="Core Facility Website (MS PowerPage)"
+                />
+                <figcaption>Core Facility Website (MS PowerPage)</figcaption>
               </figure>
             </div>
           </article>
@@ -1770,9 +2049,9 @@
             <div class="scene">
               <div class="cube" id="cube">
                 <button class="face front" type="button" data-face="front" aria-label="Show Core Facility Applications face"><span>Core Facility<br>Applications</span></button>
-                <button class="face back" type="button" data-face="back" aria-label="Show Controlling face"><span>Controlling</span></button>
-                <button class="face right" type="button" data-face="right" aria-label="Show Reporting face"><span>Reporting</span></button>
                 <button class="face left" type="button" data-face="left" aria-label="Show Billing face"><span>Billing</span></button>
+                <button class="face right" type="button" data-face="right" aria-label="Show Reporting face"><span>Reporting</span></button>
+                <button class="face back" type="button" data-face="back" aria-label="Show Inventory face"><span>Inventory</span></button>
                 <button class="face top" type="button" data-face="top" aria-label="Show User Management face"><span>User<br>Management</span></button>
                 <button class="face bottom" type="button" data-face="bottom" aria-label="Show Service Management face"><span>Service<br>Management</span></button>
               </div>
@@ -1783,12 +2062,12 @@
         <aside class="faces-panel" id="facesPanel" aria-labelledby="featuresHeading">
           <h2 id="featuresHeading">Features</h2>
           <div class="face-buttons" role="group" aria-labelledby="featuresHeading">
-            <button class="face-btn" type="button" data-face="front" aria-pressed="false">Core Facility<br>Applications</button>
-            <button class="face-btn" type="button" data-face="back" aria-pressed="false">Controlling</button>
-            <button class="face-btn" type="button" data-face="right" aria-pressed="false">Reporting</button>
-            <button class="face-btn" type="button" data-face="left" aria-pressed="false">Billing</button>
             <button class="face-btn" type="button" data-face="top" aria-pressed="false">User<br>Management</button>
+            <button class="face-btn" type="button" data-face="front" aria-pressed="false">Core Facility<br>Applications</button>
             <button class="face-btn" type="button" data-face="bottom" aria-pressed="false">Service<br>Management</button>
+            <button class="face-btn" type="button" data-face="left" aria-pressed="false">Billing</button>
+            <button class="face-btn" type="button" data-face="right" aria-pressed="false">Reporting</button>
+            <button class="face-btn" type="button" data-face="back" aria-pressed="false">Inventory</button>
           </div>
         </aside>
       </div>
@@ -1816,17 +2095,18 @@
     };
 
     const FACE_LABELS = {
-      overview: 'Overview',
-      front: 'Core Facility Applications',
-      back: 'Controlling',
-      right: 'Reporting',
-      left: 'Billing',
       top: 'User Management',
+      front: 'Core Facility Applications',
       bottom: 'Service Management',
+      left: 'Billing',
+      right: 'Reporting',
+      back: 'Inventory',
     };
 
     // Presentation order matches the Features button stack
     const FACE_ORDER = buttons.map((btn) => btn.dataset.face).filter(Boolean);
+    // First feature is the default landing face (User Management)
+    const DEFAULT_FACE = FACE_ORDER[0] || 'top';
 
     const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
     const AUTO_TILT_X = -18;
@@ -1849,8 +2129,8 @@
     let spinPhase = 25; // accumulated yaw
     let pitchPhase = 25; // independent faster pitch phase
     let selectedFace = null;
-    let activeTemplate = 'overview';
-    let autoSpin = true;
+    let activeTemplate = null;
+    let autoSpin = false;
     let inspecting = false;
     let autoSpinId = null;
     let spinEaseTimer = null;
@@ -1925,13 +2205,13 @@
     }
 
     function showContentTemplate(faceKey) {
-      const key = FACE_LABELS[faceKey] ? faceKey : 'overview';
+      const key = FACE_LABELS[faceKey] ? faceKey : DEFAULT_FACE;
       if (key === activeTemplate) {
         return;
       }
 
       const next = templates.find((el) => el.dataset.face === key) ||
-        templates.find((el) => el.dataset.face === 'overview');
+        templates.find((el) => el.dataset.face === DEFAULT_FACE);
       if (!next) return;
 
       const currentEl = templates.find((el) => el.dataset.face === activeTemplate);
@@ -2014,9 +2294,10 @@
       clearFaceHoldTimer();
 
       if (clearFace) {
+        // Keep a real feature template visible (no overview page)
         selectedFace = null;
         clearSelection();
-        showContentTemplate('overview');
+        showContentTemplate(DEFAULT_FACE);
       }
     }
 
@@ -2087,9 +2368,10 @@
         setButtonSelection(highlightedFace);
         showContentTemplate(highlightedFace);
       } else {
-        // Explicit background/reset resume: clear selection + overview
-        clearSelection();
-        showContentTemplate('overview');
+        // Explicit resume: fall back to the default landing feature
+        selectedFace = DEFAULT_FACE;
+        setButtonSelection(DEFAULT_FACE);
+        showContentTemplate(DEFAULT_FACE);
       }
 
       // Brief ease from locked pose into auto-spin trajectory
@@ -2231,7 +2513,7 @@
           if (selectedFace) {
             selectedFace = null;
             clearSelection();
-            showContentTemplate('overview');
+            showContentTemplate(DEFAULT_FACE);
           }
         }
       }
@@ -2338,8 +2620,8 @@
           showFace(FACE_ORDER[FACE_ORDER.length - 1]);
           break;
         case 'Escape':
-          // Exit locked feature → overview + auto-spin
-          startAutoSpin();
+          // Exit inspect/locked state → default feature (User Management)
+          showFace(DEFAULT_FACE);
           break;
         case 'r':
         case 'R':
@@ -2362,12 +2644,11 @@
       advanceFeature(1);
     });
 
-    // Start spinning by default with overview content
-    showContentTemplate('overview');
+    // Land on User Management (first Features item) instead of overview
     pitchPhase = 25;
     current = sampleSpinPose(spinPhase, pitchPhase);
     applyRotation(current, { animate: false });
-    startAutoSpin();
+    showFace(DEFAULT_FACE, { animate: false });
   </script>
 </body>
 </html>
