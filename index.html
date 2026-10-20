@@ -797,7 +797,6 @@
     .face-template[data-face="left"]   { --face-accent: #ffa100; }
     .face-template[data-face="top"]    { --face-accent: #99cc34; }
     .face-template[data-face="bottom"] { --face-accent: #99cc34; }
-    .face-template[data-face="overview"] { --face-accent: #7dd3fc; }
 
     .pane-cube {
       background:
@@ -1539,60 +1538,6 @@
       <div class="pane-label content-title" id="contentPaneLabel">VBCF DataCube - Bridging core facility utilisation, billing &amp; reporting</div>
       <div class="pane-body" id="contentPaneBody" aria-live="polite" aria-atomic="true">
 
-        <!-- Default template while auto-rotating -->
-        <div class="face-template is-active" data-face="overview" id="template-overview">
-          <article class="content-section is-points">
-            <figure class="actor-card">
-              <img
-                src="assets/actors/actor-overview.svg"
-                width="150"
-                height="150"
-                alt="Actor placeholder portrait"
-              />
-              <figcaption>ACTOR</figcaption>
-            </figure>
-            <div class="points-main">
-            <span class="content-kicker">Overview</span>
-            <h3>Explore the cube topics</h3>
-            <p>Select a face on the right to load its dedicated content template here.</p>
-            <ul class="content-list">
-              <li>Each face has its own title, bullet list, and two images</li>
-              <li>User Management covers strategy, ambition, and long-range goals</li>
-              <li>Core Facility Applications introduces the product vision and core promise</li>
-              <li>Service Management grounds the story in foundations and operations</li>
-              <li>Billing captures context, constraints, and supporting detail</li>
-              <li>Reporting focuses on growth, momentum, and next actions</li>
-              <li>Inventory covers stock, assets, and availability</li>
-              <li>Click background space anytime to return to this overview</li>
-            </ul>
-          
-            </div>
-          </article>
-          <article class="content-section is-media">
-            <h3>Tools in Action</h3>
-            <div class="content-gallery">
-              <figure>
-                <img
-                  src="assets/ov_image01.jpg"
-                  width="960"
-                  height="640"
-                  alt="Overview image 01"
-                />
-                <figcaption>Overview · image 01</figcaption>
-              </figure>
-              <figure>
-                <img
-                  src="assets/ov_image02.jpg"
-                  width="960"
-                  height="640"
-                  alt="Overview image 02"
-                />
-                <figcaption>Overview · image 02</figcaption>
-              </figure>
-            </div>
-          </article>
-        </div>
-
         <!-- FRONT template -->
         <div class="face-template" data-face="front" id="template-front">
           <article class="content-section is-points">
@@ -2031,7 +1976,6 @@
     };
 
     const FACE_LABELS = {
-      overview: 'Overview',
       top: 'User Management',
       front: 'Core Facility Applications',
       bottom: 'Service Management',
@@ -2042,6 +1986,8 @@
 
     // Presentation order matches the Features button stack
     const FACE_ORDER = buttons.map((btn) => btn.dataset.face).filter(Boolean);
+    // First feature is the default landing face (User Management)
+    const DEFAULT_FACE = FACE_ORDER[0] || 'top';
 
     const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
     const AUTO_TILT_X = -18;
@@ -2064,8 +2010,8 @@
     let spinPhase = 25; // accumulated yaw
     let pitchPhase = 25; // independent faster pitch phase
     let selectedFace = null;
-    let activeTemplate = 'overview';
-    let autoSpin = true;
+    let activeTemplate = null;
+    let autoSpin = false;
     let inspecting = false;
     let autoSpinId = null;
     let spinEaseTimer = null;
@@ -2140,13 +2086,13 @@
     }
 
     function showContentTemplate(faceKey) {
-      const key = FACE_LABELS[faceKey] ? faceKey : 'overview';
+      const key = FACE_LABELS[faceKey] ? faceKey : DEFAULT_FACE;
       if (key === activeTemplate) {
         return;
       }
 
       const next = templates.find((el) => el.dataset.face === key) ||
-        templates.find((el) => el.dataset.face === 'overview');
+        templates.find((el) => el.dataset.face === DEFAULT_FACE);
       if (!next) return;
 
       const currentEl = templates.find((el) => el.dataset.face === activeTemplate);
@@ -2229,9 +2175,10 @@
       clearFaceHoldTimer();
 
       if (clearFace) {
+        // Keep a real feature template visible (no overview page)
         selectedFace = null;
         clearSelection();
-        showContentTemplate('overview');
+        showContentTemplate(DEFAULT_FACE);
       }
     }
 
@@ -2302,9 +2249,10 @@
         setButtonSelection(highlightedFace);
         showContentTemplate(highlightedFace);
       } else {
-        // Explicit background/reset resume: clear selection + overview
-        clearSelection();
-        showContentTemplate('overview');
+        // Explicit resume: fall back to the default landing feature
+        selectedFace = DEFAULT_FACE;
+        setButtonSelection(DEFAULT_FACE);
+        showContentTemplate(DEFAULT_FACE);
       }
 
       // Brief ease from locked pose into auto-spin trajectory
@@ -2446,7 +2394,7 @@
           if (selectedFace) {
             selectedFace = null;
             clearSelection();
-            showContentTemplate('overview');
+            showContentTemplate(DEFAULT_FACE);
           }
         }
       }
@@ -2553,8 +2501,8 @@
           showFace(FACE_ORDER[FACE_ORDER.length - 1]);
           break;
         case 'Escape':
-          // Exit locked feature → overview + auto-spin
-          startAutoSpin();
+          // Exit inspect/locked state → default feature (User Management)
+          showFace(DEFAULT_FACE);
           break;
         case 'r':
         case 'R':
@@ -2577,12 +2525,11 @@
       advanceFeature(1);
     });
 
-    // Start spinning by default with overview content
-    showContentTemplate('overview');
+    // Land on User Management (first Features item) instead of overview
     pitchPhase = 25;
     current = sampleSpinPose(spinPhase, pitchPhase);
     applyRotation(current, { animate: false });
-    startAutoSpin();
+    showFace(DEFAULT_FACE, { animate: false });
   </script>
 </body>
 </html>
