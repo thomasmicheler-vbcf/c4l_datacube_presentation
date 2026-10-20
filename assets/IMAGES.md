@@ -9,7 +9,7 @@ Two visuals per topic. Place files **directly in `assets/`**.
 {prefix}_image02.jpg
 ```
 
-PNG is fine too (`{prefix}_image01.png`) — if you use PNG, update the matching `src` in `cube.html`.
+PNG is fine too (`{prefix}_image01.png`) — if you use PNG, update the matching `src` in `index.html`.
 
 | Prefix | Topic | Face | Files to provide |
 | --- | --- | --- | --- |
@@ -26,6 +26,6 @@ PNG is fine too (`{prefix}_image01.png`) — if you use PNG, update the matching
 1. Export two photos per topic (suggested ~1600×1000, web-optimized).
 2. Save/overwrite the matching filenames in `assets/`.
 3. Keep the exact stem (`cf_image01`, …). Extension default in HTML is **`.jpg`**.
-4. If you supply `.png` instead, change that image’s `src` in `cube.html` to `.png`.
+4. If you supply `.png` instead, change that image’s `src` in `index.html` to `.png`.
 
 Placeholder `.jpg` files are tiny stubs so paths resolve until real images are dropped in.

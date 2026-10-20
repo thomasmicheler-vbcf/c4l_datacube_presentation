@@ -9,7 +9,7 @@ No build step or dependencies.
 
 | File | Purpose |
 | --- | --- |
-| `cube.html` | Complete app (markup, styles, and script) |
+| `index.html` | Complete app (markup, styles, and script) |
 | `README.md` | Setup, usage, and UI structure docs |
 
 ## Quick start
@@ -17,7 +17,7 @@ No build step or dependencies.
 ### Option A — open directly
 
 ```bash
-open cube.html
+open index.html
 ```
 
 ### Option B — local static server (recommended)
@@ -30,7 +30,7 @@ python3 -m http.server 8080
 Open:
 
 ```text
-http://localhost:8080/cube.html
+http://localhost:8080/
 ```
 
 ## Final UI structure
@@ -97,7 +97,7 @@ Templates:
 
 ## Responsive verification
 
-Structural checks passed for the current `cube.html`.
+Structural checks passed for the current `index.html`.
 
 ### Breakpoints
 
@@ -156,7 +156,7 @@ Internet Explorer is not supported.
 
 | Area | Where to edit |
 | --- | --- |
-| Face copy / bullets / images | Face templates in `cube.html` (`data-face="..."`) |
+| Face copy / bullets / images | Face templates in `index.html` (`data-face="..."`) |
 | Actor image(s) | `.actors-stack` / `.actor-card` in each points section (duplicate a card for a second actor) |
 | Cube size | `:root --cube-size` |
 | Column widths | `.layout { grid-template-columns: ... }` |
