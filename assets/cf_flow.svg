@@ -1,0 +1,257 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 385" width="780" height="385" role="img" aria-labelledby="cfTitle cfDesc" style="background:transparent;background-color:transparent">
+  <title id="cf-cfTitle">Datacube middleware architecture</title>
+  <desc id="cf-cfDesc">Datacube Middleware sits in the center. It pushes data up to Billing, Reporting, and Controlling, and exchanges data bidirectionally with six core facility applications below.</desc>
+
+  <defs>
+    <linearGradient id="cf-hubGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8e06a"/>
+      <stop offset="100%" stop-color="#7aa328"/>
+    </linearGradient>
+    <linearGradient id="cf-orgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fb6db"/>
+      <stop offset="100%" stop-color="#4d7aa8"/>
+    </linearGradient>
+    <linearGradient id="cf-appGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdba74"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <filter id="cf-softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <marker id="cf-arrowBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 1.2 L8 5 L0 8.8 Z" fill="#8fb6db"/>
+    </marker>
+    <marker id="cf-arrowOrange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 1.2 L8 5 L0 8.8 Z" fill="#fdba74"/>
+    </marker>
+    <marker id="cf-arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 1.2 L8 5 L0 8.8 Z" fill="#b8e06a"/>
+    </marker>
+
+    <style>
+      svg, :root {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+      .label {
+        font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        fill: #e8eefc;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+      .label-sm { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+      .label-lg { font-size: 16px; font-weight: 820; letter-spacing: 0.015em; }
+      .sub {
+        font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-size: 12px;
+        font-weight: 650;
+        fill: rgba(226,232,240,0.88);
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+      .caption {
+        font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-size: 12.5px;
+        font-weight: 700;
+        fill: rgba(226,232,240,0.9);
+        text-anchor: middle;
+        letter-spacing: 0.03em;
+      }
+      .node { stroke: rgba(255,255,255,0.32); stroke-width: 1.4; }
+      .flow {
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-dasharray: 8 10;
+      }
+      .flow-org { stroke: #8fb6db; animation: dash 1.6s linear infinite; }
+      .flow-down { stroke: #fdba74; animation: dash 1.55s linear infinite; }
+      .flow-up { stroke: #b8e06a; animation: dash-rev 1.55s linear infinite; }
+
+      .pulse-ring {
+        fill: none;
+        stroke: #b8e06a;
+        stroke-width: 2.2;
+        opacity: 0;
+        transform-origin: 390px 148px;
+        animation: ring 2.8s ease-out infinite;
+      }
+      .hub-glow { animation: hubPulse 2.8s ease-in-out infinite; transform-origin: 390px 148px; }
+
+      .org, .hub, .app { animation: fadeIn 0.65s ease-out both; }
+      .org-1 { animation-delay: 0.05s; }
+      .org-2 { animation-delay: 0.12s; }
+      .org-3 { animation-delay: 0.19s; }
+      .hub { animation-delay: 0.22s; }
+      .app-1 { animation-delay: 0.3s; }
+      .app-2 { animation-delay: 0.36s; }
+      .app-3 { animation-delay: 0.42s; }
+      .app-4 { animation-delay: 0.48s; }
+      .app-5 { animation-delay: 0.54s; }
+      .app-6 { animation-delay: 0.6s; }
+
+      @keyframes dash { to { stroke-dashoffset: -72; } }
+      @keyframes dash-rev { to { stroke-dashoffset: 72; } }
+      @keyframes hubPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+      }
+      @keyframes ring {
+        0% { opacity: 0.5; transform: scale(0.92); }
+        70% { opacity: 0; transform: scale(1.28); }
+        100% { opacity: 0; transform: scale(1.28); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flow, .pulse-ring, .hub-glow, .org, .hub, .app { animation: none !important; }
+        .flow { stroke-dasharray: none; }
+        .pulse-ring { display: none; }
+        .org, .hub, .app { opacity: 1; transform: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- captions -->
+  <text class="caption" x="390" y="22">Organizational Applications</text>
+  <text class="caption" x="390" y="368">Core Facility Applications</text>
+
+  <!--
+    Orange CF apps span x=18..766 (left edge first box to right edge last box).
+    Datacube width aligns to that: x=18, width=748.
+  -->
+
+  <!-- Datacube -> org apps (reversed direction) -->
+  <path id="cf-p-org1" class="flow flow-org" d="M330 128 C300 115, 200 108, 170 102" marker-end="url(#cf-arrowBlue)"/>
+  <path id="cf-p-org2" class="flow flow-org" d="M390 128 C390 116, 390 110, 390 102" marker-end="url(#cf-arrowBlue)"/>
+  <path id="cf-p-org3" class="flow flow-org" d="M450 128 C480 115, 580 108, 610 102" marker-end="url(#cf-arrowBlue)"/>
+
+  <!-- Bidirectional: Datacube <-> CF apps -->
+  <!-- down (middleware -> apps), orange -->
+  <path id="cf-p-app1d" class="flow flow-down" d="M90 178 C90 210, 78 240, 78 274" marker-end="url(#cf-arrowOrange)"/>
+  <path id="cf-p-app2d" class="flow flow-down" d="M208 178 C208 210, 208 240, 208 274" marker-end="url(#cf-arrowOrange)"/>
+  <path id="cf-p-app3d" class="flow flow-down" d="M338 178 C338 210, 338 240, 338 274" marker-end="url(#cf-arrowOrange)"/>
+  <path id="cf-p-app4d" class="flow flow-down" d="M468 178 C468 210, 468 240, 468 274" marker-end="url(#cf-arrowOrange)"/>
+  <path id="cf-p-app5d" class="flow flow-down" d="M593 178 C593 210, 593 240, 593 274" marker-end="url(#cf-arrowOrange)"/>
+  <path id="cf-p-app6d" class="flow flow-down" d="M711 178 C711 210, 711 240, 711 274" marker-end="url(#cf-arrowOrange)"/>
+  <!-- up (apps -> middleware), green -->
+  <path id="cf-p-app1u" class="flow flow-up" d="M98 274 C98 240, 110 210, 120 178" marker-end="url(#cf-arrowGreen)"/>
+  <path id="cf-p-app2u" class="flow flow-up" d="M218 274 C218 240, 230 210, 250 178" marker-end="url(#cf-arrowGreen)"/>
+  <path id="cf-p-app3u" class="flow flow-up" d="M348 274 C348 240, 360 210, 370 178" marker-end="url(#cf-arrowGreen)"/>
+  <path id="cf-p-app4u" class="flow flow-up" d="M458 274 C458 240, 440 210, 420 178" marker-end="url(#cf-arrowGreen)"/>
+  <path id="cf-p-app5u" class="flow flow-up" d="M583 274 C583 240, 560 210, 530 178" marker-end="url(#cf-arrowGreen)"/>
+  <path id="cf-p-app6u" class="flow flow-up" d="M701 274 C701 240, 680 210, 650 178" marker-end="url(#cf-arrowGreen)"/>
+
+  <!-- TOP: organizational apps (blue) -->
+  <g class="org org-1">
+    <rect class="node" x="100" y="50" width="140" height="52" rx="13" fill="url(#cf-orgGrad)"/>
+    <text class="label label-sm" x="170" y="76">Billing</text>
+  </g>
+  <g class="org org-2">
+    <rect class="node" x="320" y="50" width="140" height="52" rx="13" fill="url(#cf-orgGrad)"/>
+    <text class="label label-sm" x="390" y="76">Reporting</text>
+  </g>
+  <g class="org org-3">
+    <rect class="node" x="540" y="50" width="140" height="52" rx="13" fill="url(#cf-orgGrad)"/>
+    <text class="label label-sm" x="610" y="76">Controlling</text>
+  </g>
+
+  <!-- CENTER: Datacube Middleware — shorter height, full orange-row width -->
+  <circle class="pulse-ring" cx="390" cy="148" r="40"/>
+  <circle class="pulse-ring" cx="390" cy="148" r="40" style="animation-delay:1.4s"/>
+  <g class="hub hub-glow">
+    <!-- left edge 18, right edge 766 => width 748 -->
+    <rect class="node" x="18" y="128" width="748" height="50" rx="14" fill="url(#cf-hubGrad)" filter="url(#cf-softGlow)"/>
+    <text class="label label-lg" x="390" y="145">Datacube</text>
+    <text class="sub" x="390" y="163">Middleware / Integration Backbone</text>
+  </g>
+
+  <!-- BOTTOM: CF applications (orange) -->
+  <g class="app app-1">
+    <rect class="node" x="18" y="284" width="120" height="56" rx="12" fill="url(#cf-appGrad)"/>
+    <text class="label label-sm" x="78" y="304">Instrument</text>
+    <text class="sub" x="78" y="322">Booking</text>
+  </g>
+  <g class="app app-2">
+    <rect class="node" x="148" y="284" width="120" height="56" rx="12" fill="url(#cf-appGrad)"/>
+    <text class="label label-sm" x="208" y="304">Service</text>
+    <text class="sub" x="208" y="322">Portal</text>
+  </g>
+  <g class="app app-3">
+    <rect class="node" x="278" y="284" width="120" height="56" rx="12" fill="url(#cf-appGrad)"/>
+    <text class="label label-sm" x="338" y="304">eCommerce</text>
+    <text class="sub" x="338" y="322">Platform</text>
+  </g>
+  <g class="app app-4">
+    <rect class="node" x="408" y="284" width="120" height="56" rx="12" fill="url(#cf-appGrad)"/>
+    <text class="label label-sm" x="468" y="304">Sample</text>
+    <text class="sub" x="468" y="322">Management</text>
+  </g>
+  <g class="app app-5">
+    <rect class="node" x="538" y="284" width="110" height="56" rx="12" fill="url(#cf-appGrad)"/>
+    <text class="label label-sm" x="593" y="304">ELN</text>
+    <text class="sub" x="593" y="322">Portal</text>
+  </g>
+  <g class="app app-6">
+    <rect class="node" x="656" y="284" width="110" height="56" rx="12" fill="url(#cf-appGrad)"/>
+    <text class="label label-sm" x="711" y="304">Custom</text>
+    <text class="sub" x="711" y="322">Solutions</text>
+  </g>
+
+  <!-- packets -->
+  <circle r="3.5" fill="#bfdbfe">
+    <animateMotion dur="1.9s" repeatCount="indefinite"><mpath href="#cf-p-org1"/></animateMotion>
+  </circle>
+  <circle r="3.5" fill="#bfdbfe">
+    <animateMotion dur="1.9s" begin="0.35s" repeatCount="indefinite"><mpath href="#cf-p-org2"/></animateMotion>
+  </circle>
+  <circle r="3.5" fill="#bfdbfe">
+    <animateMotion dur="1.9s" begin="0.7s" repeatCount="indefinite"><mpath href="#cf-p-org3"/></animateMotion>
+  </circle>
+
+  <circle r="3.3" fill="#fed7aa">
+    <animateMotion dur="1.8s" begin="0.1s" repeatCount="indefinite"><mpath href="#cf-p-app1d"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#fed7aa">
+    <animateMotion dur="1.8s" begin="0.35s" repeatCount="indefinite"><mpath href="#cf-p-app2d"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#fed7aa">
+    <animateMotion dur="1.8s" begin="0.6s" repeatCount="indefinite"><mpath href="#cf-p-app3d"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#fed7aa">
+    <animateMotion dur="1.8s" begin="0.85s" repeatCount="indefinite"><mpath href="#cf-p-app4d"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#fed7aa">
+    <animateMotion dur="1.8s" begin="1.05s" repeatCount="indefinite"><mpath href="#cf-p-app5d"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#fed7aa">
+    <animateMotion dur="1.8s" begin="1.25s" repeatCount="indefinite"><mpath href="#cf-p-app6d"/></animateMotion>
+  </circle>
+
+  <circle r="3.3" fill="#d9f99d">
+    <animateMotion dur="1.8s" begin="0.2s" repeatCount="indefinite"><mpath href="#cf-p-app1u"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#d9f99d">
+    <animateMotion dur="1.8s" begin="0.5s" repeatCount="indefinite"><mpath href="#cf-p-app2u"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#d9f99d">
+    <animateMotion dur="1.8s" begin="0.8s" repeatCount="indefinite"><mpath href="#cf-p-app3u"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#d9f99d">
+    <animateMotion dur="1.8s" begin="1.05s" repeatCount="indefinite"><mpath href="#cf-p-app4u"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#d9f99d">
+    <animateMotion dur="1.8s" begin="1.25s" repeatCount="indefinite"><mpath href="#cf-p-app5u"/></animateMotion>
+  </circle>
+  <circle r="3.3" fill="#d9f99d">
+    <animateMotion dur="1.8s" begin="1.45s" repeatCount="indefinite"><mpath href="#cf-p-app6u"/></animateMotion>
+  </circle>
+</svg>
