@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 340" width="780" height="340" role="img" aria-labelledby="umTitle umDesc" style="background:transparent;background-color:transparent">
+  <title id="umTitle">VBC Login identity and access flow</title>
+  <desc id="umDesc">VBC Login in the center connects out to three identity systems on the left, syncs with DataCube Customer Management below, and pushes access to four core facility applications on the right.</desc>
+
+  <defs>
+    <linearGradient id="hubGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b8e06a"/>
+      <stop offset="100%" stop-color="#7aa328"/>
+    </linearGradient>
+    <linearGradient id="idpGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="appGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdba74"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 1.2 L8 5 L0 8.8 Z" fill="#b8e06a"/>
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0 1.2 L8 5 L0 8.8 Z" fill="#fdba74"/>
+    </marker>
+
+    <style>
+      svg, :root {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+      .label {
+        font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        fill: #e8eefc;
+        text-anchor: middle;
+      }
+      .label-sm { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }
+      .label-md { font-size: 15px; font-weight: 780; }
+      .label-lg { font-size: 17px; font-weight: 820; letter-spacing: 0.015em; }
+      .sub {
+        font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-size: 12.5px;
+        font-weight: 650;
+        fill: rgba(226,232,240,0.86);
+        text-anchor: middle;
+      }
+      .caption {
+        font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        fill: rgba(226,232,240,0.9);
+        text-anchor: middle;
+        letter-spacing: 0.03em;
+      }
+      .node { stroke: rgba(255,255,255,0.32); stroke-width: 1.4; }
+      .flow {
+        fill: none;
+        stroke-width: 2.6;
+        stroke-linecap: round;
+        stroke-dasharray: 8 10;
+      }
+      .flow-idp { stroke: #c4b5fd; animation: dash 1.6s linear infinite; }
+      .flow-cm-a { stroke: #b8e06a; stroke-width: 2.8; animation: dash 1.8s linear infinite; }
+      .flow-cm-b { stroke: #b8e06a; stroke-width: 2.8; animation: dash-rev 1.8s linear infinite; }
+      .flow-app { stroke: #fdba74; animation: dash 1.5s linear infinite; }
+      .flow-user { stroke: #e2e8f0; stroke-width: 2.4; animation: dash 1.4s linear infinite; }
+
+      .pulse-ring {
+        fill: none;
+        stroke: #b8e06a;
+        stroke-width: 2.2;
+        opacity: 0;
+        transform-origin: 340px 128px;
+        animation: ring 2.8s ease-out infinite;
+      }
+      .hub-glow { animation: hubPulse 2.8s ease-in-out infinite; transform-origin: 340px 128px; }
+
+      .idp, .hub, .cm, .app, .user { animation: fadeIn 0.65s ease-out both; }
+      .user { animation-delay: 0.15s; }
+      .idp-1 { animation-delay: 0.05s; }
+      .idp-2 { animation-delay: 0.12s; }
+      .idp-3 { animation-delay: 0.19s; }
+      .hub { animation-delay: 0.22s; }
+      .cm { animation-delay: 0.32s; }
+      .app-1 { animation-delay: 0.38s; }
+      .app-2 { animation-delay: 0.45s; }
+      .app-3 { animation-delay: 0.52s; }
+      .app-4 { animation-delay: 0.59s; }
+
+      @keyframes dash { to { stroke-dashoffset: -72; } }
+      @keyframes dash-rev { to { stroke-dashoffset: 72; } }
+      @keyframes hubPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+      }
+      @keyframes ring {
+        0% { opacity: 0.5; transform: scale(0.92); }
+        70% { opacity: 0; transform: scale(1.28); }
+        100% { opacity: 0; transform: scale(1.28); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-6px); }
+        to { opacity: 1; transform: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flow, .pulse-ring, .hub-glow, .idp, .hub, .cm, .app { animation: none !important; }
+        .flow { stroke-dasharray: none; }
+        .pulse-ring { display: none; }
+        .idp, .hub, .cm, .app { opacity: 1; transform: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- column captions -->
+  <text class="caption" x="104" y="28">Identity Management</text>
+  <text class="caption" x="610" y="28">CF Applications</text>
+
+  <!-- CF User -> VBC Login -->
+  <path id="p-user" class="flow flow-user" d="M340 58 C340 68, 340 78, 340 90" marker-end="url(#arrowGreen)"/>
+
+  <!-- VBC Login -> Identity Management -->
+  <path id="p-idp1" class="flow flow-idp" d="M266 118 C240 100, 210 78, 178 78" marker-end="url(#arrowGreen)"/>
+  <path id="p-idp2" class="flow flow-idp" d="M266 132 C240 140, 210 152, 178 152" marker-end="url(#arrowGreen)"/>
+  <path id="p-idp3" class="flow flow-idp" d="M266 148 C245 180, 215 226, 178 226" marker-end="url(#arrowGreen)"/>
+
+  <!-- VBC Login <-> Customer Management -->
+  <path id="p-cm-out" class="flow flow-cm-a" d="M326 168 C326 188, 326 204, 326 222" marker-end="url(#arrowGreen)"/>
+  <path id="p-cm-in" class="flow flow-cm-b" d="M354 222 C354 204, 354 188, 354 168" marker-end="url(#arrowGreen)"/>
+
+  <!-- VBC Login -> CF apps -->
+  <path id="p-app1" class="flow flow-app" d="M414 112 C470 95, 510 72, 540 68" marker-end="url(#arrowOrange)"/>
+  <path id="p-app2" class="flow flow-app" d="M414 128 C470 128, 510 128, 540 130" marker-end="url(#arrowOrange)"/>
+  <path id="p-app3" class="flow flow-app" d="M414 144 C470 160, 510 184, 540 190" marker-end="url(#arrowOrange)"/>
+  <path id="p-app4" class="flow flow-app" d="M414 156 C470 190, 515 240, 540 250" marker-end="url(#arrowOrange)"/>
+
+  <!-- LEFT: identity systems -->
+  <g class="idp idp-1">
+    <rect class="node" x="24" y="48" width="154" height="60" rx="14" fill="url(#idpGrad)"/>
+    <text class="label label-sm" x="101" y="74">Identity System</text>
+    <text class="sub" x="101" y="94">Organization A</text>
+  </g>
+  <g class="idp idp-2">
+    <rect class="node" x="24" y="122" width="154" height="60" rx="14" fill="url(#idpGrad)"/>
+    <text class="label label-sm" x="101" y="148">Identity System</text>
+    <text class="sub" x="101" y="168">Organization B</text>
+  </g>
+  <g class="idp idp-3">
+    <rect class="node" x="24" y="196" width="154" height="60" rx="14" fill="url(#idpGrad)"/>
+    <text class="label label-sm" x="101" y="222">Identity System</text>
+    <text class="sub" x="101" y="242">Organization C</text>
+  </g>
+
+  <!-- CF User (person) -->
+  <g class="user">
+    <circle cx="340" cy="20" r="13" fill="#f8fafc" stroke="rgba(255,255,255,0.45)" stroke-width="1.3"/>
+    <path d="M316 54 C316 36, 364 36, 364 54 Z" fill="#f8fafc" stroke="rgba(255,255,255,0.45)" stroke-width="1.3"/>
+    <text class="label label-sm" x="400" y="34">CF User</text>
+  </g>
+
+  <!-- CENTER: VBC Login -->
+  <circle class="pulse-ring" cx="340" cy="128" r="54"/>
+  <circle class="pulse-ring" cx="340" cy="128" r="54" style="animation-delay:1.4s"/>
+  <g class="hub hub-glow">
+    <rect class="node" x="266" y="90" width="148" height="76" rx="16" fill="url(#hubGrad)" filter="url(#softGlow)"/>
+    <text class="label label-lg" x="340" y="124">VBC Login</text>
+    <text class="sub" x="340" y="146">Keycloak</text>
+  </g>
+
+  <!-- CENTER BELOW: Customer Management (same green as VBC Login) -->
+  <g class="cm">
+    <rect class="node" x="252" y="222" width="176" height="76" rx="16" fill="url(#hubGrad)" filter="url(#softGlow)"/>
+    <text class="label label-md" x="340" y="254">Customer Management</text>
+    <text class="sub" x="340" y="276">Datacube</text>
+  </g>
+
+  <!-- RIGHT: CF apps -->
+  <g class="app app-1">
+    <rect class="node" x="540" y="42" width="140" height="52" rx="13" fill="url(#appGrad)"/>
+    <text class="label label-sm" x="610" y="68" dominant-baseline="middle">CF App 1</text>
+  </g>
+  <g class="app app-2">
+    <rect class="node" x="540" y="104" width="140" height="52" rx="13" fill="url(#appGrad)"/>
+    <text class="label label-sm" x="610" y="130" dominant-baseline="middle">CF App 2</text>
+  </g>
+  <g class="app app-3">
+    <rect class="node" x="540" y="166" width="140" height="52" rx="13" fill="url(#appGrad)"/>
+    <text class="label label-sm" x="610" y="192" dominant-baseline="middle">CF App 3</text>
+  </g>
+  <g class="app app-4">
+    <rect class="node" x="540" y="228" width="140" height="52" rx="13" fill="url(#appGrad)"/>
+    <text class="label label-sm" x="610" y="254" dominant-baseline="middle">CF App 4</text>
+  </g>
+
+  <!-- packets -->
+  <circle r="3.8" fill="#f8fafc">
+    <animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#p-user"/></animateMotion>
+  </circle>
+
+  <circle r="3.8" fill="#e9d5ff">
+    <animateMotion dur="2.3s" repeatCount="indefinite"><mpath href="#p-idp1"/></animateMotion>
+  </circle>
+  <circle r="3.8" fill="#e9d5ff">
+    <animateMotion dur="2.3s" begin="0.35s" repeatCount="indefinite"><mpath href="#p-idp2"/></animateMotion>
+  </circle>
+  <circle r="3.8" fill="#e9d5ff">
+    <animateMotion dur="2.3s" begin="0.7s" repeatCount="indefinite"><mpath href="#p-idp3"/></animateMotion>
+  </circle>
+  <circle r="4" fill="#d9f99d">
+    <animateMotion dur="2.0s" begin="0.25s" repeatCount="indefinite"><mpath href="#p-cm-out"/></animateMotion>
+  </circle>
+  <circle r="4" fill="#d9f99d">
+    <animateMotion dur="2.0s" begin="1.1s" repeatCount="indefinite"><mpath href="#p-cm-in"/></animateMotion>
+  </circle>
+  <circle r="3.6" fill="#fed7aa">
+    <animateMotion dur="1.9s" begin="0.15s" repeatCount="indefinite"><mpath href="#p-app1"/></animateMotion>
+  </circle>
+  <circle r="3.6" fill="#fed7aa">
+    <animateMotion dur="1.9s" begin="0.4s" repeatCount="indefinite"><mpath href="#p-app2"/></animateMotion>
+  </circle>
+  <circle r="3.6" fill="#fed7aa">
+    <animateMotion dur="1.9s" begin="0.65s" repeatCount="indefinite"><mpath href="#p-app3"/></animateMotion>
+  </circle>
+  <circle r="3.6" fill="#fed7aa">
+    <animateMotion dur="1.9s" begin="0.9s" repeatCount="indefinite"><mpath href="#p-app4"/></animateMotion>
+  </circle>
+</svg>
