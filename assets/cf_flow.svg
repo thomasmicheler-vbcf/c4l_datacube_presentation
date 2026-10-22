@@ -45,11 +45,11 @@
         text-anchor: middle;
         dominant-baseline: middle;
       }
-      .label-sm { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
-      .label-lg { font-size: 16px; font-weight: 820; letter-spacing: 0.015em; }
+      .label-sm { font-size: 16px; font-weight: 700; letter-spacing: 0.02em; }
+      .label-lg { font-size: 19px; font-weight: 820; letter-spacing: 0.015em; }
       .sub {
         font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-        font-size: 12px;
+        font-size: 14.5px;
         font-weight: 650;
         fill: rgba(226,232,240,0.88);
         text-anchor: middle;
@@ -57,7 +57,7 @@
       }
       .caption {
         font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-        font-size: 12.5px;
+        font-size: 15.5px;
         font-weight: 700;
         fill: rgba(226,232,240,0.9);
         text-anchor: middle;

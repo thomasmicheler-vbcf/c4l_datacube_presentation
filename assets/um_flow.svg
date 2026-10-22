@@ -41,19 +41,19 @@
         fill: #e8eefc;
         text-anchor: middle;
       }
-      .label-sm { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }
-      .label-md { font-size: 15px; font-weight: 780; }
-      .label-lg { font-size: 17px; font-weight: 820; letter-spacing: 0.015em; }
+      .label-sm { font-size: 17px; font-weight: 700; letter-spacing: 0.01em; }
+      .label-md { font-size: 18px; font-weight: 780; }
+      .label-lg { font-size: 20px; font-weight: 820; letter-spacing: 0.015em; }
       .sub {
         font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-        font-size: 12.5px;
+        font-size: 15px;
         font-weight: 650;
         fill: rgba(226,232,240,0.86);
         text-anchor: middle;
       }
       .caption {
         font-family: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
-        font-size: 13px;
+        font-size: 16px;
         font-weight: 700;
         fill: rgba(226,232,240,0.9);
         text-anchor: middle;
@@ -175,7 +175,7 @@
 
   <!-- CENTER BELOW: Customer Management (same green as VBC Login) -->
   <g class="cm">
-    <rect class="node" x="252" y="222" width="176" height="76" rx="16" fill="url(#hubGrad)" filter="url(#softGlow)"/>
+    <rect class="node" x="226" y="222" width="228" height="76" rx="16" fill="url(#hubGrad)" filter="url(#softGlow)"/>
     <text class="label label-md" x="340" y="254">Customer Management</text>
     <text class="sub" x="340" y="276">Datacube</text>
   </g>
