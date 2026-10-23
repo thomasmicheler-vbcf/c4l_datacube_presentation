@@ -17,6 +17,7 @@
       --panel-border: rgba(148, 163, 184, 0.22);
       --panel-glow: rgba(56, 189, 248, 0.12);
       --cube-size: clamp(110px, 15vmin, 180px);
+      --cube-corner-radius: 10px;
       --half: calc(var(--cube-size) / 2);
       --actor-size: clamp(96px, 9vw, 128px);
       --pane-pad: clamp(0.75rem, 1.8vw, 1.25rem);
@@ -1251,6 +1252,30 @@
     .cube.is-locking {
       transition: transform var(--dur-lock) var(--ease-out);
     }
+    /* Closed planes prevent vertex holes; recess the core behind the rounded shell. */
+    .cube-core-face {
+      --core-inset: calc(var(--cube-corner-radius) * 0.3);
+      --core-half: calc(var(--half) - var(--core-inset));
+      position: absolute;
+      inset: var(--core-inset);
+      border-radius: 0;
+      background: linear-gradient(145deg, #ffffff, #e2e8f0);
+      backface-visibility: hidden;
+      pointer-events: none;
+    }
+
+    .cube-core-face--front  { transform: translateZ(var(--core-half)); }
+    .cube-core-face--back   { transform: rotateY(180deg) translateZ(var(--core-half)); }
+    .cube-core-face--right  { transform: rotateY(90deg) translateZ(var(--core-half)); }
+    .cube-core-face--left   { transform: rotateY(-90deg) translateZ(var(--core-half)); }
+    .cube-core-face--top    {
+      background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      transform: rotateX(90deg) translateZ(var(--core-half));
+    }
+    .cube-core-face--bottom {
+      background: linear-gradient(145deg, #e2e8f0, #cbd5e1);
+      transform: rotateX(-90deg) translateZ(var(--core-half));
+    }
 
     .face {
       --face-lift: 0px;
@@ -1267,7 +1292,7 @@
       margin: 0;
       padding: 0.28rem;
       border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 10px;
+      border-radius: var(--cube-corner-radius);
       font: inherit;
       /* Readable on beamer; still compact enough for multi-word labels */
       font-size: clamp(0.58rem, 1.85vmin, 0.78rem);
@@ -1281,7 +1306,7 @@
         inset 0 -18px 40px rgba(0, 0, 0, 0.22),
         0 0 24px rgba(255, 255, 255, 0.04);
       backface-visibility: hidden;
-      opacity: 0.94;
+      opacity: 1;
       overflow: hidden;
       cursor: pointer;
       transition:
@@ -1770,6 +1795,7 @@
         --brand-logo-max: 3.25rem;
         /* Bigger cube on 720p beamer; labels stay compact via .face font rules */
         --cube-size: clamp(108px, 15vmin, 148px);
+        --cube-corner-radius: 8px;
         --actor-size: clamp(56px, 5.2vw, 70px);
         --pane-gap: 0.28rem;
         --pane-pad: 0.45rem;
@@ -1887,7 +1913,6 @@
         letter-spacing: 0.03em;
         line-height: 1.1;
         padding: 0.24rem;
-        border-radius: 8px;
       }
 
       .face span {
@@ -3527,6 +3552,12 @@
           <div class="cube-stage">
             <div class="scene">
               <div class="cube" id="cube">
+                <span class="cube-core-face cube-core-face--front" aria-hidden="true"></span>
+                <span class="cube-core-face cube-core-face--back" aria-hidden="true"></span>
+                <span class="cube-core-face cube-core-face--right" aria-hidden="true"></span>
+                <span class="cube-core-face cube-core-face--left" aria-hidden="true"></span>
+                <span class="cube-core-face cube-core-face--top" aria-hidden="true"></span>
+                <span class="cube-core-face cube-core-face--bottom" aria-hidden="true"></span>
                 <button class="face front" type="button" data-face="front" aria-label="Show Core Facility Applications face"><span>Core Facility<br>Applications</span></button>
                 <button class="face left" type="button" data-face="left" aria-label="Show Billing face"><span>Billing</span></button>
                 <button class="face right" type="button" data-face="right" aria-label="Show Reporting face"><span>Reporting</span></button>
