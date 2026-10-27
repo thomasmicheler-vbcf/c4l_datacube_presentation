@@ -24,8 +24,8 @@
       --pane-gap: clamp(0.55rem, 1.5vh, 0.85rem);
       --brand-box-height: 8.1rem;
       --brand-logo-max: 6.35rem;
-      --right-col-min: 220px;
-      --right-col-max: 280px;
+      --right-col-min: 200px;
+      --right-col-max: 250px;
       --radius: 16px;
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
       --font: "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -2084,6 +2084,221 @@
         filter: brightness(1.16) saturate(1.1);
       }
     }
+
+    /* Overview landing: top-aligned copy + vertically centered cube column */
+    .face-template[data-face="overview"] {
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .face-template[data-face="overview"] .content-section.is-overview {
+      position: relative;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(220px, 0.85fr);
+      column-gap: clamp(1rem, 2.2vw, 1.75rem);
+      row-gap: 0;
+      align-items: stretch;
+      align-content: start;
+      overflow: auto;
+    }
+
+    .face-template[data-face="overview"] .points-main {
+      --points-actor-pad: 0px;
+      grid-column: 1;
+      grid-row: 1;
+      align-self: start;
+      justify-self: stretch;
+      margin: 0;
+      padding-right: 0;
+      padding-top: 0;
+      max-width: none;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .face-template[data-face="overview"] .points-main > .content-kicker {
+      margin: 0 0 1.75rem;
+    }
+
+    .face-template[data-face="overview"] .points-main > .content-kicker + h3 {
+      margin-top: 0.75rem;
+    }
+
+    .face-template[data-face="overview"] .overview-lead {
+      margin: 0.15rem 0 0.85rem;
+      max-width: 72ch;
+      color: rgba(147, 164, 195, 0.98);
+      font-size: clamp(0.82rem, 1.15vw, 0.98rem);
+      line-height: 1.45;
+    }
+
+    .face-template[data-face="overview"] .overview-lead + .overview-lead {
+      margin-top: 0.55rem;
+    }
+
+    .face-template[data-face="overview"] .overview-features-title {
+      margin: 1.15rem 0 0.55rem;
+      font-size: clamp(0.92rem, 1.35vw, 1.1rem);
+      font-weight: 750;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    .face-template[data-face="overview"] .content-list {
+      max-width: 54rem;
+    }
+
+    /*
+      Right column: cube top aligns with overview description start
+      (after kicker + title), horizontally centered in the column.
+    */
+    .overview-cube-wrap {
+      --overview-cube-size: clamp(180px, 22vw, 280px);
+      --overview-half: calc(var(--overview-cube-size) / 2);
+      /* kicker (~line) + kicker margin + h3 top margin + h3 size + lead top margin */
+      --overview-cube-top:
+        calc(1.05rem + 1.75rem + 0.75rem + clamp(1.15rem, 2vw, 1.45rem) + 0.15rem + 50px);
+      grid-column: 2;
+      grid-row: 1;
+      align-self: start;
+      justify-self: stretch;
+      position: relative;
+      top: auto;
+      right: auto;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      margin: 0;
+      padding: var(--overview-cube-top) 0 0;
+      pointer-events: none;
+      perspective: calc(var(--overview-cube-size) * 3.4);
+    }
+
+    .overview-mini-scene {
+      width: var(--overview-cube-size);
+      height: var(--overview-cube-size);
+      flex: 0 0 auto;
+      margin: 0;
+      transform-style: preserve-3d;
+    }
+
+    .overview-mini-cube {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      /* Negative Y brings the orange right face into view with front + top */
+      transform: rotateX(-26deg) rotateY(-34deg) rotateZ(4deg);
+    }
+
+    /* Subtle interior fill only — keeps seams closed without thick white frames */
+    .overview-mini-cube .omc-core {
+      position: absolute;
+      inset: 12%;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.92);
+      transform: translateZ(0);
+    }
+
+    .overview-mini-cube .omc-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      box-sizing: border-box;
+      padding: 0.45rem 0.5rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: clamp(0.72rem, 1.25vw, 0.95rem);
+      font-weight: 750;
+      letter-spacing: 0.03em;
+      line-height: 1.12;
+      text-align: center;
+      text-transform: uppercase;
+      color: #ffffff;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -12px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Visible faces: blue CFA (front), orange Billing (right), green User Management (top) */
+    .overview-mini-cube .omc-front {
+      background: linear-gradient(145deg, #7eb6e0, #3d6f9c);
+      transform: translateZ(var(--overview-half));
+    }
+    .overview-mini-cube .omc-back {
+      background: linear-gradient(145deg, #5b7f9c, #2f4d66);
+      transform: rotateY(180deg) translateZ(var(--overview-half));
+    }
+    .overview-mini-cube .omc-right {
+      background: linear-gradient(145deg, #ffb84d, #d97706);
+      transform: rotateY(90deg) translateZ(var(--overview-half));
+    }
+    .overview-mini-cube .omc-left {
+      background: linear-gradient(145deg, #e89a2e, #b45309);
+      transform: rotateY(-90deg) translateZ(var(--overview-half));
+    }
+    .overview-mini-cube .omc-top {
+      background: linear-gradient(145deg, #b4df5a, #6f9f1f);
+      transform: rotateX(90deg) translateZ(var(--overview-half));
+    }
+    .overview-mini-cube .omc-bottom {
+      background: linear-gradient(145deg, #84a936, #4d7c0f);
+      transform: rotateX(-90deg) translateZ(var(--overview-half));
+    }
+
+    @media (max-width: 720px) {
+      .face-template[data-face="overview"] .content-section.is-overview {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 1.25rem;
+      }
+
+      .overview-cube-wrap {
+        grid-column: 1;
+        grid-row: 1;
+        height: calc(var(--overview-cube-size) * 1.35);
+        min-height: calc(var(--overview-cube-size) * 1.35);
+      }
+
+      .face-template[data-face="overview"] .points-main {
+        grid-row: 2;
+      }
+    }
+
+    @media (min-width: 961px) and (max-height: 740px) {
+      .face-template[data-face="overview"] .content-section.is-overview {
+        grid-template-columns: minmax(0, 1.55fr) minmax(190px, 0.8fr);
+        column-gap: 0.85rem;
+      }
+
+      .overview-cube-wrap {
+        --overview-cube-size: clamp(150px, 18vw, 210px);
+        /* Match compact beamer kicker/title stack above description */
+        --overview-cube-top:
+          calc(0.9rem + 0.85rem + 0.25rem + clamp(1rem, 1.5vw, 1.2rem) + 0.1rem + 50px);
+      }
+
+      .face-template[data-face="overview"] .overview-lead {
+        font-size: clamp(0.72rem, 0.95vw, 0.84rem);
+        line-height: 1.35;
+      }
+
+      .face-template[data-face="overview"] .overview-features-title {
+        margin-top: 0.75rem;
+        font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+      }
+    }
+
+    }
+
+
   </style>
 </head>
 <body>
@@ -2093,6 +2308,61 @@
     <section class="pane pane-content" aria-label="Content">
       <div class="pane-label content-title" id="contentPaneLabel">VBCF DataCube - Bridging core facility utilisation, billing &amp; reporting</div>
       <div class="pane-body" id="contentPaneBody" aria-live="polite" aria-atomic="true">
+
+
+        <!-- OVERVIEW template (landing) -->
+        <div class="face-template" data-face="overview" id="template-overview">
+          <article class="content-section is-points is-overview">
+            <div class="points-main">
+              <span class="content-kicker">Overview</span>
+              <h3>VBCF DataCube</h3>
+              <p class="overview-lead">
+                The DataCube is a middleware platform that connects the applications of the
+                Vienna BioCenter Core Facilities (VBCF). Built as a flexible microservice
+                architecture and deployed on Kubernetes, it is designed to scale with
+                institutional demand.
+              </p>
+              <p class="overview-lead">
+                Its primary goal is to collect, store, and manage data from different core
+                facility LIMS solutions using an extract–transform–load (ETL) approach.
+                Transformed data lands in a centralized data warehouse — a single source of
+                truth for reporting and billing — enabling stronger data management,
+                analysis, and decision-making across VBCF.
+              </p>
+              <p class="overview-lead">
+                A shared customer and service directory keeps organizational data consistent
+                and ready for integration with facility tools, identity systems, and
+                financial workflows.
+              </p>
+              <h4 class="overview-features-title">Features</h4>
+              <ul class="content-list">
+                <li>User Management — identity, SSO, and customer directory</li>
+                <li>Core Facility Applications — booking, portals, and domain tools connected through the middleware backbone</li>
+                <li>Service Management — centralized service catalogue and pricing</li>
+                <li>Billing — usage-to-invoice flows with pricing policy integration</li>
+                <li>Reporting — utilization insights and planning support</li>
+                <li>Inventory — consumables and resource tracking</li>
+                <li>LIMS data collection &amp; warehouse — ETL into one source of truth</li>
+                <li>Scalable microservice platform — Kubernetes-hosted, modular, and highly available</li>
+              </ul>
+            </div>
+
+            <div class="overview-cube-wrap" aria-hidden="true">
+              <div class="overview-mini-scene">
+                <div class="overview-mini-cube">
+                  <!-- White core fills edge/corner gaps between faces -->
+                  <span class="omc-core" aria-hidden="true"></span>
+                  <span class="omc-face omc-front">Core Facility<br>Applications</span>
+                  <span class="omc-face omc-back" aria-hidden="true"></span>
+                  <span class="omc-face omc-right">Billing</span>
+                  <span class="omc-face omc-left" aria-hidden="true"></span>
+                  <span class="omc-face omc-top">User<br>Management</span>
+                  <span class="omc-face omc-bottom" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
 
         <!-- FRONT template -->
         <div class="face-template" data-face="front" id="template-front">
@@ -3572,6 +3842,7 @@
         <aside class="faces-panel" id="facesPanel" aria-labelledby="featuresHeading">
           <h2 id="featuresHeading">Features</h2>
           <div class="face-buttons" role="group" aria-labelledby="featuresHeading">
+            <button class="face-btn" type="button" data-face="overview" aria-pressed="false">Overview</button>
             <button class="face-btn" type="button" data-face="top" aria-pressed="false">User<br>Management</button>
             <button class="face-btn" type="button" data-face="front" aria-pressed="false">Core Facility<br>Applications</button>
             <button class="face-btn" type="button" data-face="bottom" aria-pressed="false">Service<br>Management</button>
@@ -3605,6 +3876,7 @@
     };
 
     const FACE_LABELS = {
+      overview: 'Overview',
       top: 'User Management',
       front: 'Core Facility Applications',
       bottom: 'Service Management',
@@ -3613,10 +3885,10 @@
       back: 'Inventory',
     };
 
-    // Presentation order matches the Features button stack
+    // Presentation order matches the Features button stack (Overview first)
     const FACE_ORDER = buttons.map((btn) => btn.dataset.face).filter(Boolean);
-    // First feature is the default landing face (User Management)
-    const DEFAULT_FACE = FACE_ORDER[0] || 'top';
+    // Landing page is Overview (first Features item)
+    const DEFAULT_FACE = FACE_ORDER[0] || 'overview';
 
     const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
     const AUTO_TILT_X = -18;
@@ -3804,7 +4076,7 @@
       clearFaceHoldTimer();
 
       if (clearFace) {
-        // Keep a real feature template visible (no overview page)
+        // Fall back to the landing template (Overview)
         selectedFace = null;
         clearSelection();
         showContentTemplate(DEFAULT_FACE);
@@ -3878,7 +4150,7 @@
         setButtonSelection(highlightedFace);
         showContentTemplate(highlightedFace);
       } else {
-        // Explicit resume: fall back to the default landing feature
+        // Explicit resume: fall back to the landing page (Overview)
         selectedFace = DEFAULT_FACE;
         setButtonSelection(DEFAULT_FACE);
         showContentTemplate(DEFAULT_FACE);
@@ -3946,6 +4218,19 @@
     }
 
     function showFace(face, { animate = true } = {}) {
+      // Overview is a content-only landing page; keep the main cube animating
+      if (face === 'overview') {
+        inspecting = false;
+        body.classList.remove('is-inspecting');
+        selectedFace = 'overview';
+        showContentTemplate('overview');
+        setButtonSelection('overview');
+        clearFaceHoldTimer();
+        // Resume / keep auto-spin immediately (preserve Overview highlight + content)
+        startAutoSpin({ preserveButtonSelection: true });
+        return;
+      }
+
       const target = FACE_ROTATIONS[face];
       if (!target) return;
 
@@ -4130,7 +4415,7 @@
           showFace(FACE_ORDER[FACE_ORDER.length - 1]);
           break;
         case 'Escape':
-          // Exit inspect/locked state → default feature (User Management)
+          // Exit inspect/locked state → landing page (Overview)
           showFace(DEFAULT_FACE);
           break;
         case 'r':
@@ -4154,11 +4439,14 @@
       advanceFeature(1);
     });
 
-    // Land on User Management (first Features item) instead of overview
+    // Land on Overview with cube animation starting immediately
     pitchPhase = 25;
     current = sampleSpinPose(spinPhase, pitchPhase);
     applyRotation(current, { animate: false });
-    showFace(DEFAULT_FACE, { animate: false });
+    selectedFace = DEFAULT_FACE;
+    setButtonSelection(DEFAULT_FACE);
+    showContentTemplate(DEFAULT_FACE);
+    startAutoSpin({ preserveButtonSelection: true });
   </script>
 </body>
 </html>
