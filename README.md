@@ -58,7 +58,7 @@ http://localhost:8080/
 
 ### Left pane (`pane-content`)
 
-Switches by selected cube face. Overview shows while free-spinning without a preserved selection.
+Starts with a Home introduction describing the Datacube architecture, ETL/data warehouse, and centralized customer and service directory. Home includes direct links to all six cube faces. On small screens, Home appears before the cube controls.
 
 Each template includes:
 
@@ -71,27 +71,41 @@ Each template includes:
 
 Templates:
 
-- `overview`
+- `home`
 - `front`, `back`, `right`, `left`, `top`, `bottom`
 
 ### Right pane (`pane-cube`)
 
 1. **VBCF logo** in a fixed-height white brand box
 2. **Cube stage** centered between logo and Features
-3. **Features panel** bottom-aligned with six vertical buttons
+3. **Features panel** bottom-aligned with a Home button and six vertical feature buttons
+
+### Direct links
+
+Append one of these fragments to the presentation URL to open a specific view:
+
+- `#home` — Home introduction (also shown when no fragment is provided)
+- `#top` — User Management
+- `#front` — Core Facility Applications
+- `#bottom` — Service Management
+- `#left` — Billing
+- `#right` — Reporting
+- `#back` — Inventory
+
+For example, `http://localhost:8080/#left` opens Billing directly. Selecting a category updates the URL so it can be copied or bookmarked. Browser Back and Forward restore the previous view.
 
 ## Interaction model
 
 | Action | Result |
 | --- | --- |
-| Page load | Auto-spin + overview content |
+| Page load | Auto-spin + Home content, or the face specified in the URL |
 | Click feature button / cube face | Lock face + load matching template |
 | After 15s face hold | Auto-spin resumes; **button + left content stay** |
-| Drag cube | Free inspect mode |
+| Drag cube | Free inspect mode + Home content |
 | **`Space` / empty click / `N` / `PageDown`** | **Presentation: next feature** |
 | **`Shift+Space` / `B` / `PageUp`** | **Presentation: previous feature** |
 | `Home` / `End` | First / last feature |
-| `Escape` | Overview + auto-spin |
+| Home button / `Escape` | Home introduction + auto-spin |
 | Keyboard orbit (`WASD` / arrows, `Q`/`E`) | Free inspect nudges |
 | `R` | Reset inspect pose |
 

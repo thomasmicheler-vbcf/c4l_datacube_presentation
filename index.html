@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="VBCF Datacube presentation: interactive 3D cube with face-linked content and features." />
+  <meta name="description" content="Discover the VBCF Datacube: scalable middleware connecting core facility applications, data management, reporting, and billing." />
   <meta name="color-scheme" content="dark" />
   <title>VBCF Datacube Presentation</title>
   <style>
@@ -2084,6 +2084,106 @@
         filter: brightness(1.16) saturate(1.1);
       }
     }
+    .pane-content .face-template[data-face="home"] {
+      display: block;
+      overflow-y: auto;
+      height: 100%;
+      min-height: 0;
+      user-select: text;
+      cursor: default;
+    }
+
+    .home-content {
+      padding: clamp(1rem, 3vw, 2.5rem);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .home-content h1 {
+      margin: 0.8rem 0 1.2rem;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      line-height: 1.15;
+    }
+
+    .home-content p {
+      max-width: 80ch;
+      margin-bottom: 1rem;
+      line-height: 1.65;
+    }
+
+    .home-content h2 {
+      margin: 1.75rem 0 0.6rem;
+      font-size: 1.2rem;
+    }
+
+    .home-facts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+      gap: 0.65rem;
+      list-style: none;
+    }
+
+    .home-facts li {
+      padding: 1rem;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: rgba(102, 153, 204, 0.1);
+      text-align: center;
+    }
+
+    .home-facts strong {
+      display: block;
+      color: #93c5fd;
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      line-height: 1.2;
+      margin-bottom: 0.35rem;
+    }
+
+    .home-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+      gap: 0.65rem;
+      list-style: none;
+    }
+
+    .home-links a {
+      display: block;
+      height: 100%;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: rgba(102, 153, 204, 0.1);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .home-links a:hover {
+      border-color: #7dd3fc;
+      background: rgba(102, 153, 204, 0.2);
+    }
+
+    .home-links a:focus-visible {
+      outline: 2px solid #7dd3fc;
+      outline-offset: 2px;
+    }
+
+    #homeButton {
+      width: 100%;
+      margin-bottom: 0.6rem;
+      --btn-active-from: #4d7aa8;
+      --btn-active-to: #334155;
+    }
+
+    @media (max-width: 960px) {
+      body.is-home .pane-content { order: 0; }
+      .pane-content .face-template:not(.is-active) {
+        display: none;
+      }
+      .pane-content .face-template[data-face="home"] {
+        height: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2093,6 +2193,36 @@
     <section class="pane pane-content" aria-label="Content">
       <div class="pane-label content-title" id="contentPaneLabel">VBCF DataCube - Bridging core facility utilisation, billing &amp; reporting</div>
       <div class="pane-body" id="contentPaneBody" aria-live="polite" aria-atomic="true">
+        <div class="face-template is-active" data-face="home" id="template-home">
+          <article class="home-content" aria-labelledby="homeHeading">
+            <span class="content-kicker">Home · VBCF Datacube</span>
+            <h1 id="homeHeading">Connecting core facilities.<br>Bringing data together.</h1>
+            <p>The Datacube is a middleware solution that has the goal to connect all existing applications of the ViennaBioCenter Core Facilities (VBCF). It is built upon a flexible microservice architecture, which is deployed in a Kubernetes cloud and therefore highly scalable.</p>
+            <p>Its primary goal is to collect, store and manage data from different core facility LIMS solutions by using an extract, transform, load (ETL) approach. The transformed data is stored in a centralized data warehouse that serves as a single source of truth for reporting and billing systems. This approach enables better data management, analysis, and decision-making for the VBCF.</p>
+            <p>Our solution provides a centralized customer and service directory, serving as a single source of truth. By consolidating information in one place, it ensures smooth integration and connectivity with other software solutions, enhancing consistency, efficiency, and scalability across your digital ecosystem.</p>
+            <section aria-labelledby="factsHeading">
+              <h2 id="factsHeading">Operational Key Facts</h2>
+              <ul class="home-facts">
+                <li><strong>12</strong> Core Facilities</li>
+                <li><strong>2500+</strong> Users</li>
+                <li><strong>75</strong> Companies</li>
+                <li><strong>34</strong> Data Types</li>
+                <li><strong>5</strong> Integration Modules</li>
+              </ul>
+            </section>
+            <nav aria-labelledby="exploreHeading">
+              <h2 id="exploreHeading">Explore the six faces of the Datacube</h2>
+              <ul class="home-links">
+                <li><a href="#top">User Management</a></li>
+                <li><a href="#front">Core Facility Applications</a></li>
+                <li><a href="#bottom">Service Management</a></li>
+                <li><a href="#left">Billing</a></li>
+                <li><a href="#right">Reporting</a></li>
+                <li><a href="#back">Inventory</a></li>
+              </ul>
+            </nav>
+          </article>
+        </div>
 
         <!-- FRONT template -->
         <div class="face-template" data-face="front" id="template-front">
@@ -3570,6 +3700,7 @@
         </div>
 
         <aside class="faces-panel" id="facesPanel" aria-labelledby="featuresHeading">
+          <button class="face-btn" id="homeButton" type="button" aria-pressed="true">Home</button>
           <h2 id="featuresHeading">Features</h2>
           <div class="face-buttons" role="group" aria-labelledby="featuresHeading">
             <button class="face-btn" type="button" data-face="top" aria-pressed="false">User<br>Management</button>
@@ -3590,7 +3721,8 @@
     const stageWrap = document.getElementById('stageWrap');
     const panel = document.getElementById('facesPanel');
     const body = document.body;
-    const buttons = Array.from(document.querySelectorAll('.face-btn'));
+    const homeButton = document.getElementById('homeButton');
+    const buttons = Array.from(document.querySelectorAll('.face-btn[data-face]'));
     const faceEls = Array.from(document.querySelectorAll('.face'));
     const templates = Array.from(document.querySelectorAll('.face-template'));
 
@@ -3615,8 +3747,7 @@
 
     // Presentation order matches the Features button stack
     const FACE_ORDER = buttons.map((btn) => btn.dataset.face).filter(Boolean);
-    // First feature is the default landing face (User Management)
-    const DEFAULT_FACE = FACE_ORDER[0] || 'top';
+    const DEFAULT_FACE = 'home';
 
     const AUTO_SPIN_SPEED = 0.42; // yaw degrees per frame-ish
     const AUTO_TILT_X = -18;
@@ -3701,6 +3832,8 @@
 
     function setButtonSelection(face) {
       const hasFace = Boolean(face);
+      homeButton.classList.toggle('active', !hasFace);
+      homeButton.setAttribute('aria-pressed', String(!hasFace));
       panel.classList.toggle('has-selection', hasFace);
       buttons.forEach((btn) => {
         const isActive = hasFace && btn.dataset.face === face;
@@ -3716,6 +3849,8 @@
 
     function showContentTemplate(faceKey) {
       const key = FACE_LABELS[faceKey] ? faceKey : DEFAULT_FACE;
+      body.classList.toggle('is-home', key === 'home');
+      templates.forEach((el) => { el.inert = el.dataset.face !== key; });
       if (key === activeTemplate) {
         return;
       }
@@ -3804,10 +3939,11 @@
       clearFaceHoldTimer();
 
       if (clearFace) {
-        // Keep a real feature template visible (no overview page)
+        // Free inspection returns to the Home introduction.
         selectedFace = null;
         clearSelection();
         showContentTemplate(DEFAULT_FACE);
+        updateLocation(DEFAULT_FACE);
       }
     }
 
@@ -3878,9 +4014,8 @@
         setButtonSelection(highlightedFace);
         showContentTemplate(highlightedFace);
       } else {
-        // Explicit resume: fall back to the default landing feature
-        selectedFace = DEFAULT_FACE;
-        setButtonSelection(DEFAULT_FACE);
+        // Explicit resume returns to Home without selecting a cube face.
+        setButtonSelection(null);
         showContentTemplate(DEFAULT_FACE);
       }
 
@@ -3945,7 +4080,33 @@
       showFace(FACE_ORDER[nextIdx]);
     }
 
-    function showFace(face, { animate = true } = {}) {
+    function updateLocation(page) {
+      const hash = `#${page}`;
+      if (window.location.hash !== hash) {
+        window.history.pushState(null, '', hash);
+      }
+    }
+
+    function showHome({ updateUrl = true } = {}) {
+      stopAutoSpin();
+      clearSelection();
+      showContentTemplate('home');
+      startAutoSpin();
+      if (updateUrl) updateLocation('home');
+    }
+
+    function readLocation({ animate = true } = {}) {
+      const page = window.location.hash.slice(1);
+      if (Object.hasOwn(FACE_ROTATIONS, page)) {
+        if (activeTemplate !== page) showFace(page, { animate, updateUrl: false });
+      } else if (!page || page === 'home') {
+        if (activeTemplate !== 'home') showHome({ updateUrl: false });
+      } else if (!activeTemplate) {
+        showHome({ updateUrl: false });
+      }
+    }
+
+    function showFace(face, { animate = true, updateUrl = true } = {}) {
       const target = FACE_ROTATIONS[face];
       if (!target) return;
 
@@ -3954,10 +4115,12 @@
       body.classList.remove('is-inspecting');
       selectedFace = face;
       showContentTemplate(face);
+      if (updateUrl) updateLocation(face);
 
       // Double-rAF ensures lock transition starts after auto-spin styles settle
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          if (selectedFace !== face || inspecting || autoSpin) return;
           const next = {
             x: shortestPath(current.x, target.x),
             y: shortestPath(current.y, target.y),
@@ -4024,6 +4187,7 @@
             selectedFace = null;
             clearSelection();
             showContentTemplate(DEFAULT_FACE);
+            updateLocation(DEFAULT_FACE);
           }
         }
       }
@@ -4052,6 +4216,13 @@
       }
     }
 
+    homeButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showHome();
+    });
+    window.addEventListener('hashchange', () => readLocation());
+    window.addEventListener('popstate', () => readLocation());
+
     buttons.forEach((btn) => {
       btn.setAttribute('aria-pressed', 'false');
       btn.addEventListener('click', (e) => {
@@ -4077,7 +4248,7 @@
     stageWrap.addEventListener('pointercancel', onPointerUp);
 
     window.addEventListener('keydown', (e) => {
-      if (e.target.matches('input, textarea, select, button')) return;
+      if (e.target.closest('input, textarea, select, button, a, [contenteditable]')) return;
 
       let handled = true;
       switch (e.key) {
@@ -4130,8 +4301,7 @@
           showFace(FACE_ORDER[FACE_ORDER.length - 1]);
           break;
         case 'Escape':
-          // Exit inspect/locked state → default feature (User Management)
-          showFace(DEFAULT_FACE);
+          showHome();
           break;
         case 'r':
         case 'R':
@@ -4154,11 +4324,11 @@
       advanceFeature(1);
     });
 
-    // Land on User Management (first Features item) instead of overview
+    // Start at Home unless a shared URL requests a specific cube face.
     pitchPhase = 25;
     current = sampleSpinPose(spinPhase, pitchPhase);
     applyRotation(current, { animate: false });
-    showFace(DEFAULT_FACE, { animate: false });
+    readLocation({ animate: false });
   </script>
 </body>
 </html>
